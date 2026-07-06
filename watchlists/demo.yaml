@@ -1,12 +1,12 @@
-# watchlists/demo.yaml — public demo watchlist (starter; expanded + verified in Task 18)
+# watchlists/demo.yaml — public demo watchlist (starter; ATS-verified in Task 18)
 orgs:
-  - { name: Abridge,          domain: abridge.com,        segment: digital-health-startup, products: [tt],       slug: abridge }
-  - { name: Datavant,         domain: datavant.com,       segment: digital-health-startup, products: [tt, ckms], slug: datavant }
-  - { name: Tempus,           domain: tempus.com,         segment: digital-health-startup, products: [tt, ckms], slug: tempus }
-  - { name: Oscar Health,     domain: hioscar.com,        segment: payer,                  products: [ckms],     slug: oscarhealth }
-  - { name: Redox,            domain: redoxengine.com,    segment: digital-health-startup, products: [tt],       slug: redox }
-  - { name: Particle Health,  domain: particlehealth.com, segment: digital-health-startup, products: [tt],       slug: particlehealth }
-  - { name: Zus Health,       domain: zushealth.com,      segment: digital-health-startup, products: [tt],       slug: zushealth }
-  - { name: Innovaccer,       domain: innovaccer.com,     segment: digital-health-startup, products: [tt, ckms], slug: innovaccer }
-  - { name: Medallion,        domain: medallion.co,       segment: digital-health-startup, products: [tt],       slug: medallion }
-  - { name: Truveta,          domain: truveta.com,        segment: digital-health-startup, products: [tt, ckms], slug: truveta }
+  - { name: Abridge,          domain: abridge.com,        segment: digital-health-startup, products: [tt],       slug: abridge,        ats: ashby }
+  - { name: Datavant,         domain: datavant.com,       segment: digital-health-startup, products: [tt, ckms], slug: datavant2,      ats: greenhouse }
+  - { name: Tempus,           domain: tempus.com,         segment: digital-health-startup, products: [tt, ckms], slug: tempus,         ats: workable }
+  - { name: Oscar Health,     domain: hioscar.com,        segment: payer,                  products: [ckms],     slug: oscar,          ats: greenhouse }
+  - { name: Redox,            domain: redoxengine.com,    segment: digital-health-startup, products: [tt],       slug: redox,          ats: workable }
+  - { name: Particle Health,  domain: particlehealth.com, segment: digital-health-startup, products: [tt],       slug: particlehealth, ats: greenhouse }
+  - { name: Zus Health,       domain: zushealth.com,      segment: digital-health-startup, products: [tt],       slug: zushealth,      ats: lever }
+  - { name: Innovaccer,       domain: innovaccer.com,     segment: digital-health-startup, products: [tt, ckms], slug: innovaccer,     ats: workable }
+  - { name: Medallion,        domain: medallion.co,       segment: digital-health-startup, products: [tt],       slug: medallion,      ats: ashby }
+  - { name: Truveta,          domain: truveta.com,        segment: digital-health-startup, products: [tt, ckms], slug: truveta,        ats: greenhouse }
