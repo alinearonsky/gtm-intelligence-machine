@@ -1,0 +1,22 @@
+# ontology/roles.yaml — role ontology v0 (pre-filter hints only; Plan 2 adds
+# classification metadata). hints are lowercase substrings, over-inclusive by design.
+version: 1
+roles:
+  - id: terminologist
+    label: Clinical Terminologist / Vocabulary
+    hints: [terminolog, snomed, loinc, rxnorm, "icd-10", "icd-11", icd10, icd11, "value set", vocabular, "code system", "concept map"]
+  - id: interoperability
+    label: FHIR / Interoperability / Integration
+    hints: [fhir, hl7, interoperab, "interface analyst", "integration engineer", "integration analyst", "cda ", ccda]
+  - id: informatics-leadership
+    label: Clinical Informatics & Leadership
+    hints: ["clinical informatic", "health informatic", cmio, "chief medical information", "medical informatic"]
+  - id: clinical-content
+    label: Clinical Content / Knowledge Management
+    hints: ["clinical content", "knowledge management", "clinical knowledge", ontolog, "clinical decision support", " cds "]
+  - id: data-quality
+    label: Clinical Data Quality / Governance
+    hints: ["data quality", "data governance", "master data", "data steward", "clinical data manag"]
+  - id: quality-measures
+    label: Quality Measures / eCQM
+    hints: [ecqm, "quality measure", "clinical quality", hedis, "measure developer"]

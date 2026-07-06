@@ -1,0 +1,27 @@
+[
+  {
+    "id": "abc-123",
+    "text": "FHIR Integration Engineer",
+    "hostedUrl": "https://jobs.lever.co/fixturehealth/abc-123",
+    "createdAt": 1750000000000,
+    "categories": { "location": "Boston, MA", "team": "Interoperability", "department": "Engineering" },
+    "descriptionPlain": "Build HL7 FHIR interfaces for clinical data exchange."
+  },
+  {
+    "id": "def-456",
+    "text": "Office Manager",
+    "hostedUrl": "https://jobs.lever.co/fixturehealth/def-456",
+    "createdAt": 1750100000000,
+    "categories": {},
+    "descriptionPlain": "Keep the office running."
+  },
+  {
+    "id": "ghi-789",
+    "text": "Clinical Data Steward",
+    "hostedUrl": "https://jobs.lever.co/fixturehealth/ghi-789",
+    "createdAt": 1750200000000,
+    "categories": { "location": "Remote" },
+    "descriptionPlain": "",
+    "description": "<p>Own SNOMED value set governance.</p>"
+  }
+]

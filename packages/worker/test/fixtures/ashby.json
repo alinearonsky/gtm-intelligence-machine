@@ -1,0 +1,13 @@
+{
+  "jobs": [
+    {
+      "id": "uuid-1",
+      "title": "Knowledge Management Lead",
+      "location": "Remote",
+      "department": "Clinical",
+      "jobUrl": "https://jobs.ashbyhq.com/fixturehealth/uuid-1",
+      "publishedAt": "2026-06-15T00:00:00.000Z",
+      "descriptionHtml": "<p>Own our clinical content and ontology strategy.</p>"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "offset": 0,
+  "limit": 100,
+  "totalFound": 1,
+  "content": [
+    {
+      "id": "744000001",
+      "name": "eCQM Measure Developer",
+      "releasedDate": "2026-06-10T08:00:00.000Z",
+      "location": { "city": "Chicago", "region": "IL" },
+      "department": { "label": "Quality" }
+    }
+  ]
+}

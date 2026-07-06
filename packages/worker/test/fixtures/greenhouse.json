@@ -1,0 +1,24 @@
+{
+  "jobs": [
+    {
+      "id": 900001,
+      "title": "Clinical Terminologist",
+      "absolute_url": "https://boards.greenhouse.io/fixturehealth/jobs/900001",
+      "updated_at": "2026-06-20T10:00:00-04:00",
+      "first_published": "2026-06-01T09:00:00-04:00",
+      "location": { "name": "Remote, US" },
+      "departments": [{ "name": "Clinical Informatics" }],
+      "content": "&lt;p&gt;Maintain SNOMED CT &amp;amp; LOINC value sets.&lt;/p&gt;"
+    },
+    {
+      "id": 900002,
+      "title": "Account Executive",
+      "absolute_url": "https://boards.greenhouse.io/fixturehealth/jobs/900002",
+      "updated_at": "2026-06-21T10:00:00-04:00",
+      "first_published": null,
+      "location": null,
+      "departments": [],
+      "content": "&lt;p&gt;Sell things.&lt;/p&gt;"
+    }
+  ]
+}

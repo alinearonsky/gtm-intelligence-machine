@@ -1,0 +1,13 @@
+{
+  "name": "@gtm/worker",
+  "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "@gtm/core": "*",
+    "postgres": "^3.4.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

@@ -1,0 +1,18 @@
+name: daily-scan
+on:
+  schedule:
+    - cron: '0 4 * * *'   # 04:00 UTC ≈ 06:00 CET
+  workflow_dispatch: {}     # manual trigger for testing
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm run scan
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

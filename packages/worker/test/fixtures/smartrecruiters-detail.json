@@ -1,0 +1,16 @@
+{
+  "id": "744000001",
+  "name": "eCQM Measure Developer",
+  "jobAd": {
+    "sections": {
+      "jobDescription": {
+        "title": "Job Description",
+        "text": "<p>Develop clinical quality measures.</p>"
+      },
+      "qualifications": {
+        "title": "Qualifications",
+        "text": "<p>HEDIS experience required.</p>"
+      }
+    }
+  }
+}

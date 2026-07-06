@@ -1,0 +1,27 @@
+{
+  "name": "Fixture Health",
+  "jobs": [
+    {
+      "title": "Clinical Data Steward",
+      "shortcode": "FH01",
+      "url": "https://apply.workable.com/fixturehealth/j/FH01/",
+      "published_on": "2026-06-05",
+      "department": "Data",
+      "description": "<p>Own master data and data governance for clinical vocabularies.</p>",
+      "city": "Denver",
+      "state": "CO",
+      "country": "United States"
+    },
+    {
+      "title": "Remote Health Data Analyst",
+      "shortcode": "FH02",
+      "url": "https://apply.workable.com/fixturehealth/j/FH02/",
+      "published_on": "2026-06-20",
+      "department": null,
+      "description": "<p>Analyze RWD quality.</p>",
+      "city": "",
+      "state": "",
+      "country": "United States"
+    }
+  ]
+}
