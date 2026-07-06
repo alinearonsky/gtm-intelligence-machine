@@ -2,12 +2,13 @@
 import postgres from 'postgres'
 
 const sql = postgres(process.env.DATABASE_URL!, { max: 1 })
-const [{ total, passed, baseline }] = await sql`
+const totals = await sql<{ total: number; passed: number; baseline: number }[]>`
   select count(*)::int as total,
          count(*) filter (where prefilter_pass)::int as passed,
          count(*) filter (where is_baseline)::int as baseline
   from postings`
-console.log(`postings: ${total} · prefilter-pass: ${passed} · baseline: ${baseline}`)
+const t = totals[0]!
+console.log(`postings: ${t.total} · prefilter-pass: ${t.passed} · baseline: ${t.baseline}`)
 const rows = await sql`
   select o.name, count(*)::int as hits,
          array_agg(distinct m) as roles
