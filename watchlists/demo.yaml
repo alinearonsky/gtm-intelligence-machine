@@ -10,3 +10,36 @@ orgs:
   - { name: Innovaccer,       domain: innovaccer.com,     segment: digital-health-startup, products: [tt, ckms], slug: innovaccer,     ats: workable }
   - { name: Medallion,        domain: medallion.co,       segment: digital-health-startup, products: [tt],       slug: medallion,      ats: ashby }
   - { name: Truveta,          domain: truveta.com,        segment: digital-health-startup, products: [tt, ckms], slug: truveta,        ats: greenhouse }
+
+  # --- Task 18 step 2: expanded via backwards role-search (clinical terminology / FHIR / interop postings) ---
+  - { name: Freenome,           domain: freenome.com,           segment: digital-health-startup, products: [tt],       slug: freenome,               ats: greenhouse }
+  - { name: Qualified Health,   domain: qualifiedhealthai.com,  segment: digital-health-startup, products: [tt, ckms], slug: qualified-health-pbc,   ats: ashby }
+  - { name: Verana Health,      domain: veranahealth.com,       segment: digital-health-startup, products: [tt, ckms], slug: veranahealth,           ats: greenhouse }
+  - { name: Bellese,            domain: bellese.io,             segment: other,                  products: [tt],       slug: bellese,                ats: lever }
+  - { name: Smile Digital Health, domain: smiledigitalhealth.com, segment: digital-health-startup, products: [tt, ckms], slug: smiledigitalhealth,   ats: lever }
+  - { name: Aledade,            domain: aledade.com,            segment: digital-health-startup, products: [tt, ckms], slug: aledade,                ats: lever }
+  - { name: Commure,            domain: commure.com,            segment: digital-health-startup, products: [tt, ckms], slug: commure,                ats: ashby }
+  - { name: Rainfall Health,     domain: rainfallhealth.com,     segment: digital-health-startup, products: [tt, ckms], slug: rainfallhealth,         ats: ashby }
+  - { name: Foundation Health,   domain: foundationhealth.com,   segment: digital-health-startup, products: [tt],       slug: foundationhealthcareers, ats: ashby }
+  - { name: Lifebit,             domain: lifebit.ai,             segment: digital-health-startup, products: [tt],       slug: lifebit-biotech-ltd,    ats: workable }
+  - { name: Zenara Health,        domain: zenarahealth.com,       segment: digital-health-startup, products: [tt],       slug: zenara-health,          ats: workable }
+  - { name: IMO Health,           domain: imohealth.com,          segment: other,                  products: [tt, ckms], slug: imo-online,             ats: lever }
+  - { name: Arcadia,              domain: arcadia.io,             segment: digital-health-startup, products: [tt, ckms], slug: arcadia,                ats: lever }
+  - { name: Included Health,       domain: includedhealth.com,     segment: digital-health-startup, products: [tt, ckms], slug: includedhealth,         ats: lever }
+  - { name: Axle Informatics,       domain: axleinfo.com,           segment: other,                  products: [tt],       slug: axle,                   ats: greenhouse }
+  - { name: Phamily,                 domain: phamily.com,            segment: digital-health-startup, products: [tt, ckms], slug: jobsatphamily,          ats: greenhouse }
+  - { name: PerfectServe,             domain: perfectserve.com,       segment: digital-health-startup, products: [tt, ckms], slug: perfectserve,           ats: greenhouse }
+  - { name: Layer Health,              domain: layerhealth.com,        segment: digital-health-startup, products: [tt],       slug: layerhealth,            ats: greenhouse }
+  - { name: SmarterDx,                  domain: smarterdx.com,          segment: digital-health-startup, products: [tt, ckms], slug: smarterdx,              ats: greenhouse }
+  - { name: 1upHealth,                   domain: 1up.health,             segment: digital-health-startup, products: [tt],       slug: 1uphealth,              ats: greenhouse }
+  - { name: Chorus Innovations,           domain: joinchorus.com,         segment: digital-health-startup, products: [tt],       slug: chorusinnovations,      ats: greenhouse }
+  - { name: Trilogy Federal,               domain: trilogyfederal.com,     segment: other,                  products: [tt],       slug: TrilogyFederal,         ats: lever }
+  - { name: Altarum,                        domain: altarum.org,            segment: other,                  products: [tt],       slug: altarum,                ats: lever }
+
+  # --- Task 18 step 2: top-up via name recognition (verified live ATS boards) ---
+  - { name: Canvas Medical,   domain: canvasmedical.com,   segment: ehr-vendor,             products: [tt],       slug: canvasmedical,      ats: lever }
+  - { name: Clover Health,    domain: cloverhealth.com,    segment: payer,                  products: [ckms],     slug: cloverhealth,       ats: greenhouse }
+  - { name: Elation Health,   domain: elationhealth.com,   segment: ehr-vendor,             products: [tt],       slug: elationhealth,      ats: greenhouse }
+  - { name: Komodo Health,    domain: komodohealth.com,    segment: digital-health-startup, products: [tt, ckms], slug: komodohealth,       ats: greenhouse }
+  - { name: Ambience Healthcare, domain: ambiencehealthcare.com, segment: digital-health-startup, products: [tt], slug: ambiencehealthcare, ats: ashby }
+  - { name: CodaMetrix,       domain: codametrix.com,      segment: digital-health-startup, products: [tt, ckms], slug: codametrix,         ats: ashby }
