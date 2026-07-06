@@ -1,0 +1,8 @@
+[
+  { "title": "Clinical Terminologist", "description": "Own and maintain SNOMED CT and LOINC value sets for our clinical data platform. Build concept maps across code systems.", "expectRole": "terminologist", "expectStandards": ["SNOMED", "LOINC"] },
+  { "title": "FHIR Integration Engineer", "description": "Design and build HL7 FHIR interfaces for clinical data exchange between EHRs and our platform.", "expectRole": "interoperability", "expectStandards": ["FHIR"] },
+  { "title": "Director of Clinical Informatics", "description": "Lead our clinical informatics strategy and a team building decision support.", "expectRole": "informatics-leadership", "expectStandards": [] },
+  { "title": "eCQM Measure Developer", "description": "Develop and validate electronic clinical quality measures. HEDIS experience a plus.", "expectRole": "quality-measures", "expectStandards": ["eCQM", "HEDIS"] },
+  { "title": "Clinical Data Steward", "description": "Own master data and data governance for clinical vocabularies and reference data.", "expectRole": "data-quality", "expectStandards": [] },
+  { "title": "Senior Account Executive", "description": "Sell our SaaS platform to mid-market health systems. Quota-carrying role.", "expectRole": "none", "expectStandards": [] }
+]

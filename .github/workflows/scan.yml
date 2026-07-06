@@ -7,12 +7,23 @@ on:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: npm ci
+      - run: npm run migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - run: npm run scan
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Only `extract` needs the LLM key; `scan` and `interpret` do not.
+      - run: npm run extract
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - run: npm run interpret
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}

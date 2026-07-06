@@ -1,6 +1,6 @@
 import postgres from 'postgres'
-import { contentHash, type PostingDiff, type WatchlistOrgT, type AtsTypeT } from '@gtm/core'
-import type { ApplyDiffMeta, OrgRow, ScanRunResult, Store } from './types.ts'
+import { contentHash, type PostingDiff, type WatchlistOrgT, type AtsTypeT, type ExtractionT, type OrgPostingFacts } from '@gtm/core'
+import type { ApplyDiffMeta, ExtractionMeta, LensScoreRecord, OrgRow, ScanRunResult, SignalRecord, SignalRow, Store } from './types.ts'
 
 export class PostgresStore implements Store {
   private sql: postgres.Sql
@@ -99,4 +99,100 @@ export class PostgresStore implements Store {
   }
 
   async close() { await this.sql.end() }
+
+  async listOrgIds(): Promise<number[]> {
+    return (await this.sql`select id from orgs order by id`).map((r) => r.id as number)
+  }
+
+  async listPostingsNeedingExtraction(orgId: number, promptVersion: string) {
+    const rows = await this.sql`
+      select p.id, p.external_id, p.title, p.url, p.location, p.department, p.description, p.published_at
+      from postings p
+      where p.org_id = ${orgId} and p.prefilter_pass = true
+        and not exists (
+          select 1 from extractions e
+          where e.posting_id = p.id and e.prompt_version = ${promptVersion})`
+    return rows.map((r) => ({
+      postingId: r.id as number,
+      posting: {
+        externalId: r.external_id as string, title: r.title as string, url: r.url as string,
+        location: (r.location as string | null), department: (r.department as string | null),
+        description: r.description as string,
+        publishedAt: r.published_at ? new Date(r.published_at as string).toISOString() : null,
+      },
+    }))
+  }
+
+  async upsertExtraction(postingId: number, ext: ExtractionT, meta: ExtractionMeta) {
+    await this.sql`
+      insert into extractions (posting_id, role_category, seniority, standards_mentioned,
+        clinical_domain, team_context, function_type, confidence, model, prompt_version, status)
+      values (${postingId}, ${ext.roleCategory}, ${ext.seniority}, ${ext.standardsMentioned},
+        ${ext.clinicalDomain}, ${ext.teamContext}, ${ext.functionType}, ${ext.confidence},
+        ${meta.model}, ${meta.promptVersion}, 'ok')
+      on conflict (posting_id, prompt_version) do update set
+        role_category = excluded.role_category, seniority = excluded.seniority,
+        standards_mentioned = excluded.standards_mentioned, clinical_domain = excluded.clinical_domain,
+        team_context = excluded.team_context, function_type = excluded.function_type,
+        confidence = excluded.confidence, model = excluded.model, status = 'ok'`
+  }
+
+  async markExtractionFailed(postingId: number, meta: ExtractionMeta) {
+    await this.sql`
+      insert into extractions (posting_id, role_category, seniority, function_type, confidence, model, prompt_version, status)
+      values (${postingId}, 'none', 'unknown', 'unknown', 0, ${meta.model}, ${meta.promptVersion}, 'failed')
+      on conflict (posting_id, prompt_version) do update set status = 'failed', model = excluded.model`
+  }
+
+  async getOrgExtractionFacts(orgId: number): Promise<OrgPostingFacts[]> {
+    const rows = await this.sql`
+      select distinct on (p.id)
+        p.external_id, p.url, p.title, p.description, p.is_baseline, p.first_seen, p.removed_at,
+        e.role_category, e.seniority, e.standards_mentioned, e.function_type, e.confidence
+      from postings p
+      join extractions e on e.posting_id = p.id and e.status = 'ok'
+      where p.org_id = ${orgId}
+      order by p.id, e.created_at desc`
+    return rows.map((r) => ({
+      externalId: r.external_id as string, url: r.url as string,
+      evidenceQuote: `${r.title} — ${r.description}`.slice(0, 240),
+      roleCategory: r.role_category, seniority: r.seniority, standardsMentioned: r.standards_mentioned,
+      functionType: r.function_type, confidence: r.confidence,
+      isBaseline: r.is_baseline as boolean,
+      firstSeen: new Date(r.first_seen as string).toISOString(),
+      removedAt: r.removed_at ? new Date(r.removed_at as string).toISOString() : null,
+    }))
+  }
+
+  async upsertSignal(rec: SignalRecord): Promise<number> {
+    const rows = await this.sql`
+      insert into signals (org_id, signal_type, stage, strength, rule_id, evidence_key, evidence,
+        confidence, is_baseline_assessment, rules_version)
+      values (${rec.orgId}, ${rec.signalType}, ${rec.stage}, ${rec.strength}, ${rec.ruleId}, ${rec.evidenceKey},
+        ${this.sql.json(rec.evidence)}, ${rec.confidence}, ${rec.isBaselineAssessment}, ${rec.rulesVersion})
+      on conflict (org_id, rule_id, evidence_key) do update set
+        signal_type = excluded.signal_type, stage = excluded.stage, strength = excluded.strength,
+        evidence = excluded.evidence, confidence = excluded.confidence,
+        is_baseline_assessment = excluded.is_baseline_assessment, rules_version = excluded.rules_version
+      returning id`
+    return rows[0]!.id as number
+  }
+
+  async listSignals(orgId: number): Promise<SignalRow[]> {
+    const rows = await this.sql`select * from signals where org_id = ${orgId} order by id`
+    return rows.map((r) => ({
+      id: r.id as number, orgId: r.org_id as number, signalType: r.signal_type as string, stage: r.stage as string,
+      strength: r.strength as number, ruleId: r.rule_id as string, evidenceKey: r.evidence_key as string,
+      evidence: r.evidence, confidence: r.confidence as number,
+      isBaselineAssessment: r.is_baseline_assessment as boolean, rulesVersion: r.rules_version as number,
+    }))
+  }
+
+  async upsertLensScore(l: LensScoreRecord): Promise<void> {
+    await this.sql`
+      insert into lens_scores (signal_id, lens, priority, rationale, rubric_version)
+      values (${l.signalId}, ${l.lens}, ${l.priority}, ${l.rationale}, ${l.rubricVersion})
+      on conflict (signal_id, lens) do update set
+        priority = excluded.priority, rationale = excluded.rationale, rubric_version = excluded.rubric_version`
+  }
 }

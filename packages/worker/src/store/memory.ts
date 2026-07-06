@@ -1,9 +1,12 @@
-import { contentHash, type PostingDiff, type RawPostingT, type WatchlistOrgT, type AtsTypeT } from '@gtm/core'
-import type { ApplyDiffMeta, OrgRow, ScanRunResult, Store, StoredPostingRow } from './types.ts'
+import { contentHash, type PostingDiff, type RawPostingT, type WatchlistOrgT, type AtsTypeT, type ExtractionT, type OrgPostingFacts } from '@gtm/core'
+import type { ApplyDiffMeta, ExtractionMeta, LensScoreRecord, OrgRow, ScanRunResult, SignalRecord, SignalRow, Store, StoredPostingRow } from './types.ts'
 
+interface MemExtraction { ext: ExtractionT; status: 'ok' | 'failed'; promptVersion: string; model: string; createdAt: string }
 interface MemPosting extends StoredPostingRow {
   raw: RawPostingT
   prefilterMatches: string[]
+  id: number
+  extractions: MemExtraction[]
 }
 
 export class MemoryStore implements Store {
@@ -13,6 +16,10 @@ export class MemoryStore implements Store {
   private scannedOnce = new Set<number>()
   runs: ScanRunResult[] = []
   private nextId = 1
+  private nextPostingId = 1
+  private signals: SignalRow[] = []
+  private nextSignalId = 1
+  private lensScores: LensScoreRecord[] = []
 
   async upsertOrg(org: WatchlistOrgT): Promise<number> {
     const existing = this.bySlug.get(org.slug)
@@ -46,6 +53,7 @@ export class MemoryStore implements Store {
         externalId: raw.externalId, contentHash: contentHash(raw.title, raw.description),
         title: raw.title, isBaseline: meta.baseline, prefilterPass: pf.pass, prefilterMatches: pf.matches,
         firstSeen: meta.now, lastSeen: meta.now, removedAt: null, raw,
+        id: this.nextPostingId++, extractions: [],
       })
     }
     for (const raw of diff.changed) {
@@ -70,6 +78,71 @@ export class MemoryStore implements Store {
   async recordRun(run: ScanRunResult) { this.runs.push(run) }
   async close() {}
 
+  async listOrgIds(): Promise<number[]> { return [...this.orgs.keys()] }
+
+  async listPostingsNeedingExtraction(orgId: number, promptVersion: string) {
+    return [...this.postings.get(orgId)!.values()]
+      .filter((p) => p.prefilterPass && !p.extractions.some((e) => e.promptVersion === promptVersion))
+      .map((p) => ({ postingId: p.id, posting: p.raw }))
+  }
+
+  async upsertExtraction(postingId: number, ext: ExtractionT, meta: ExtractionMeta) {
+    const p = this.findPosting(postingId)
+    p.extractions = p.extractions.filter((e) => e.promptVersion !== meta.promptVersion)
+    p.extractions.push({ ext, status: 'ok', promptVersion: meta.promptVersion, model: meta.model, createdAt: meta.now })
+  }
+
+  async markExtractionFailed(postingId: number, meta: ExtractionMeta) {
+    const p = this.findPosting(postingId)
+    p.extractions = p.extractions.filter((e) => e.promptVersion !== meta.promptVersion)
+    p.extractions.push({ ext: null as unknown as ExtractionT, status: 'failed', promptVersion: meta.promptVersion, model: meta.model, createdAt: meta.now })
+  }
+
+  private findPosting(postingId: number): MemPosting {
+    for (const map of this.postings.values())
+      for (const p of map.values()) if (p.id === postingId) return p
+    throw new Error(`unknown postingId ${postingId}`)
+  }
+
+  async getOrgExtractionFacts(orgId: number): Promise<OrgPostingFacts[]> {
+    const out: OrgPostingFacts[] = []
+    for (const p of this.postings.get(orgId)!.values()) {
+      const ok = p.extractions.filter((e) => e.status === 'ok')
+      if (ok.length === 0) continue
+      const latest = ok.reduce((a, b) => (a.createdAt >= b.createdAt ? a : b))
+      const e = latest.ext
+      out.push({
+        externalId: p.externalId, url: p.raw.url,
+        evidenceQuote: `${p.raw.title} — ${p.raw.description}`.slice(0, 240),
+        roleCategory: e.roleCategory, seniority: e.seniority, standardsMentioned: e.standardsMentioned,
+        functionType: e.functionType, confidence: e.confidence,
+        isBaseline: p.isBaseline, firstSeen: p.firstSeen, removedAt: p.removedAt,
+      })
+    }
+    return out
+  }
+
+  async upsertSignal(rec: SignalRecord): Promise<number> {
+    const existing = this.signals.find((s) => s.orgId === rec.orgId && s.ruleId === rec.ruleId && s.evidenceKey === rec.evidenceKey)
+    if (existing) { Object.assign(existing, rec); return existing.id }
+    const id = this.nextSignalId++
+    this.signals.push({ ...rec, id })
+    return id
+  }
+
+  async listSignals(orgId: number): Promise<SignalRow[]> {
+    return this.signals.filter((s) => s.orgId === orgId).map((s) => ({ ...s }))
+  }
+
   /** Test helper — not part of the Store interface. */
   dumpPostings(orgId: number): MemPosting[] { return [...this.postings.get(orgId)!.values()] }
+
+  async upsertLensScore(l: LensScoreRecord): Promise<void> {
+    const existing = this.lensScores.find((s) => s.signalId === l.signalId && s.lens === l.lens)
+    if (existing) Object.assign(existing, l)
+    else this.lensScores.push({ ...l })
+  }
+
+  /** Test helper — not part of the Store interface. */
+  dumpLensScores(): LensScoreRecord[] { return this.lensScores.map((s) => ({ ...s })) }
 }

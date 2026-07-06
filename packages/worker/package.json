@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "type": "module",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
     "@gtm/core": "*",
     "postgres": "^3.4.0",
     "zod": "^3.23.0"

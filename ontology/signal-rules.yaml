@@ -1,0 +1,150 @@
+# ontology/signal-rules.yaml — the interpretation ontology (v1). Deterministic,
+# versioned, replayable over stored extractions. Every rule ships with a
+# fires/doesn't-fire case in packages/core/test/signal-rules-ontology.test.ts.
+#
+# Condition primitives: role-is | is-baseline | not-baseline | function-is |
+#   seniority-in | prior-role-count | cluster-within-days | trigger-removed |
+#   standards-new. dedupe: per-posting (default) | per-org.
+version: 1
+rules:
+  - id: first-terminology-hire
+    title: First terminology hire
+    signal_type: entering-adoption
+    stage: early
+    strength: 4
+    baseline_safe: false
+    rationale: >
+      The org had no prior clinical-terminology posting and just opened one — a
+      strong early signal that it is entering the clinical-vocabulary adoption
+      journey.
+    when:
+      - { type: role-is, roles: [terminologist] }
+      - { type: not-baseline }
+      - { type: prior-role-count, role: terminologist, op: eq, value: 0 }
+
+  - id: first-interoperability-hire
+    title: First interoperability hire
+    signal_type: integration-starting
+    stage: early
+    strength: 3
+    baseline_safe: false
+    rationale: >
+      First FHIR/HL7 interoperability role — the org is standing up data
+      exchange, which frequently precedes a terminology-normalization need.
+    when:
+      - { type: role-is, roles: [interoperability] }
+      - { type: not-baseline }
+      - { type: prior-role-count, role: interoperability, op: eq, value: 0 }
+
+  - id: implementation-cluster
+    title: Implementation cluster
+    signal_type: mid-implementation
+    stage: mid
+    strength: 5
+    baseline_safe: false
+    dedupe: per-org
+    rationale: >
+      Two or more terminology/clinical-content/data-quality roles opened within
+      60 days — the org is actively staffing a build, the highest-intent window.
+    when:
+      - { type: role-is, roles: [terminologist, clinical-content, data-quality] }
+      - { type: not-baseline }
+      - { type: cluster-within-days, roles: [terminologist, clinical-content, data-quality], count: 2, days: 60 }
+
+  - id: terminology-leadership-hire
+    title: Terminology leadership hire
+    signal_type: strategic-commitment
+    stage: mid
+    strength: 4
+    baseline_safe: false
+    rationale: >
+      A director/exec-level clinical-informatics leader signals organizational
+      commitment and budget authority behind the terminology program.
+    when:
+      - { type: role-is, roles: [informatics-leadership] }
+      - { type: not-baseline }
+      - { type: seniority-in, seniorities: [director, exec] }
+
+  - id: standards-adoption-drift
+    title: Standards-adoption drift
+    signal_type: standards-adoption
+    stage: early
+    strength: 2
+    baseline_safe: false
+    rationale: >
+      A posting names FHIR/SNOMED/LOINC where the org's prior postings never
+      did — awareness of clinical standards is rising.
+    when:
+      - { type: not-baseline }
+      - { type: standards-new, standards: [FHIR, SNOMED, LOINC] }
+
+  - id: role-filled
+    title: Terminology role filled
+    signal_type: implementation-staffed
+    stage: mid
+    strength: 3
+    baseline_safe: false
+    rationale: >
+      A terminology/interop/content posting was removed within 90 days of being
+      opened — likely filled, so implementation is now staffed and the buying
+      window is open.
+    when:
+      - { type: role-is, roles: [terminologist, interoperability, clinical-content] }
+      - { type: not-baseline }
+      - { type: trigger-removed, maxLifetimeDays: 90 }
+
+  - id: quality-measures-investment
+    title: Quality-measures investment
+    signal_type: measures-program-forming
+    stage: early
+    strength: 3
+    baseline_safe: false
+    rationale: >
+      First eCQM/HEDIS quality-measures role — a measures program is forming,
+      which depends on well-governed value sets.
+    when:
+      - { type: role-is, roles: [quality-measures] }
+      - { type: not-baseline }
+      - { type: prior-role-count, role: quality-measures, op: eq, value: 0 }
+
+  - id: data-quality-buildout
+    title: Clinical data-quality buildout
+    signal_type: governance-investment
+    stage: mid
+    strength: 2
+    baseline_safe: false
+    rationale: >
+      A clinical data-quality/governance role indicates investment in reference
+      data discipline — adjacent to a terminology-management need.
+    when:
+      - { type: role-is, roles: [data-quality] }
+      - { type: not-baseline }
+
+  - id: baseline-terminology-presence
+    title: Baseline terminology presence
+    signal_type: stage-assessment
+    stage: mid
+    strength: 2
+    baseline_safe: true
+    dedupe: per-org
+    rationale: >
+      Open terminology/clinical-content roles at first observation suggest the
+      org already runs active clinical-vocabulary work — a stage assessment, not
+      a timed event.
+    when:
+      - { type: is-baseline }
+      - { type: role-is, roles: [terminologist, clinical-content] }
+
+  - id: baseline-interoperability-presence
+    title: Baseline interoperability presence
+    signal_type: stage-assessment
+    stage: early
+    strength: 2
+    baseline_safe: true
+    dedupe: per-org
+    rationale: >
+      Open interoperability roles at first observation indicate an integration
+      program already in progress — a stage assessment.
+    when:
+      - { type: is-baseline }
+      - { type: role-is, roles: [interoperability] }

@@ -1,0 +1,29 @@
+# ontology/lenses/tt.yaml — Terminology Tool product lens (v1). Maps signal
+# types to sales priority for the TT trials motion. First matching rule wins;
+# baseline assessments are capped to `watch` by the scorer regardless.
+version: 1
+lens: tt
+label: Terminology Tool
+default_priority: ignore
+rules:
+  - signal_types: [entering-adoption, mid-implementation]
+    segments: [digital-health-startup, ehr-vendor, measure-developer, health-system]
+    min_strength: 3
+    priority: act-now
+    rationale: "{org}: {signalType} (strength {strength}) — actively building clinical-terminology capability. Prime Terminology Tool trial window."
+  - signal_types: [implementation-staffed]
+    min_strength: 1
+    priority: watch
+    rationale: "{org}: a terminology/interop role was filled — implementation underway. Re-check for expansion or a tooling gap."
+  - signal_types: [integration-starting, standards-adoption]
+    min_strength: 1
+    priority: watch
+    rationale: "{org}: {signalType} — early interoperability/standards movement that often precedes a terminology-normalization need. Monitor."
+  - signal_types: [strategic-commitment, measures-program-forming, governance-investment]
+    min_strength: 2
+    priority: watch
+    rationale: "{org}: {signalType} — organizational investment adjacent to terminology management. Warm, not yet timed."
+  - signal_types: [stage-assessment]
+    min_strength: 1
+    priority: watch
+    rationale: "{org}: baseline {stage}-stage assessment inferred from current openings — context, not a timed event."

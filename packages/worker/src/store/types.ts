@@ -1,4 +1,4 @@
-import type { PostingDiff, RawPostingT, WatchlistOrgT, AtsTypeT } from '@gtm/core'
+import type { PostingDiff, RawPostingT, WatchlistOrgT, AtsTypeT, ExtractionT, OrgPostingFacts } from '@gtm/core'
 
 export interface OrgRow extends WatchlistOrgT {
   id: number
@@ -34,6 +34,31 @@ export interface ApplyDiffMeta {
   prefilter: (p: RawPostingT) => { pass: boolean; matches: string[] }
 }
 
+export interface PostingForExtraction { postingId: number; posting: RawPostingT }
+export interface ExtractionMeta { model: string; promptVersion: string; now: string }
+
+export interface SignalRecord {
+  orgId: number
+  signalType: string
+  stage: string
+  strength: number
+  ruleId: string
+  evidenceKey: string
+  evidence: { externalId: string; url: string; quote: string }[]
+  confidence: number
+  isBaselineAssessment: boolean
+  rulesVersion: number
+}
+export interface SignalRow extends SignalRecord { id: number }
+
+export interface LensScoreRecord {
+  signalId: number
+  lens: string
+  priority: string
+  rationale: string
+  rubricVersion: number
+}
+
 export interface Store {
   /** Insert or update by slug. The watchlist is authoritative: an omitted
    *  `ats` clears any previously-configured value (detection then applies). */
@@ -53,4 +78,16 @@ export interface Store {
   applyDiff(orgId: number, diff: PostingDiff, meta: ApplyDiffMeta): Promise<void>
   recordRun(run: ScanRunResult): Promise<void>
   close(): Promise<void>
+  listOrgIds(): Promise<number[]>
+  listPostingsNeedingExtraction(orgId: number, promptVersion: string): Promise<PostingForExtraction[]>
+  upsertExtraction(postingId: number, ext: ExtractionT, meta: ExtractionMeta): Promise<void>
+  markExtractionFailed(postingId: number, meta: ExtractionMeta): Promise<void>
+  /** Every 'ok'-extracted posting for the org, joined to posting metadata, as
+   *  the pure facts the rules engine reasons over. */
+  getOrgExtractionFacts(orgId: number): Promise<OrgPostingFacts[]>
+  /** Upsert a signal by (org_id, rule_id, evidence_key); returns its id. */
+  upsertSignal(s: SignalRecord): Promise<number>
+  listSignals(orgId: number): Promise<SignalRow[]>
+  /** Upsert a lens score by (signal_id, lens). */
+  upsertLensScore(l: LensScoreRecord): Promise<void>
 }

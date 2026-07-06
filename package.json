@@ -6,7 +6,9 @@
   "scripts": {
     "test": "vitest run",
     "scan": "tsx packages/worker/src/index.ts",
-    "migrate": "tsx packages/worker/scripts/migrate.ts"
+    "migrate": "tsx packages/worker/scripts/migrate.ts",
+    "extract": "tsx packages/worker/src/extract-cli.ts",
+    "interpret": "tsx packages/worker/src/interpret-cli.ts"
   },
   "devDependencies": {
     "tsx": "^4.19.0",
