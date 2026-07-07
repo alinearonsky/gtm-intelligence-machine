@@ -29,7 +29,6 @@
   },
   "include": [
     "src",
-    "middleware.ts",
     "next-env.d.ts",
     ".next/types/**/*.ts"
   ],
