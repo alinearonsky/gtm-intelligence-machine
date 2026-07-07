@@ -2,13 +2,16 @@
   "name": "gtm-intelligence-machine",
   "private": true,
   "type": "module",
-  "workspaces": ["packages/*"],
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
     "test": "vitest run",
+    "test:db": "vitest run --project db",
     "scan": "tsx packages/worker/src/index.ts",
     "migrate": "tsx packages/worker/scripts/migrate.ts",
     "extract": "tsx packages/worker/src/extract-cli.ts",
-    "interpret": "tsx packages/worker/src/interpret-cli.ts"
+    "interpret": "tsx packages/worker/src/interpret-cli.ts",
+    "dev:dashboard": "npm run dev -w apps/dashboard",
+    "build:dashboard": "npm run build -w apps/dashboard"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

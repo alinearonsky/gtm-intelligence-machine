@@ -165,6 +165,10 @@ export class PostgresStore implements Store {
   }
 
   async upsertSignal(rec: SignalRecord): Promise<number> {
+    // INVARIANT: `status` is user-owned (set from the dashboard: reviewed/
+    // dismissed/acted). It MUST NOT appear in the update set below — a
+    // nightly re-fire on the same key must preserve the operator's curation.
+    // Regression-guarded by packages/worker/test/signal-status.db.test.ts.
     const rows = await this.sql`
       insert into signals (org_id, signal_type, stage, strength, rule_id, evidence_key, evidence,
         confidence, is_baseline_assessment, rules_version)

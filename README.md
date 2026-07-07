@@ -27,3 +27,6 @@ CI: add `DATABASE_URL` as a repo Actions secret; the `daily-scan` workflow does 
 ```bash
 npm test
 ```
+
+## Apps
+- `apps/dashboard` — Next.js dashboard (signal feed, org profile, watchlist, ontology, run health). See `apps/dashboard/README.md`.
