@@ -23,7 +23,7 @@ export function SignalStatusControls({ signalId, status }: { signalId: number; s
       <span className="text-xs text-muted-foreground">status: {status}</span>
       <Button variant="ghost" size="sm" disabled={pending} onClick={() => run('reviewed')}>Reviewed</Button>
       <Button variant="ghost" size="sm" disabled={pending} onClick={() => run('dismissed')}>Dismiss</Button>
-      {failed && <span className="text-xs text-red-600">failed</span>}
+      {failed && <span className="text-xs text-destructive">failed</span>}
     </div>
   )
 }

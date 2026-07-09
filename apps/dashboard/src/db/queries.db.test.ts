@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import type { TestDb } from '../../test/pgtest.ts'
 import { startTestDb, seedFixture } from '../../test/pgtest.ts'
-import { getSignalFeed, getOrgProfile } from './queries.ts'
+import { getSignalFeed, getOrgProfile, getFilterOptions } from './queries.ts'
 
 let tdb: TestDb
 
@@ -36,5 +36,20 @@ describe('getOrgProfile', () => {
     expect(profile).not.toBeNull()
     expect(profile!.signals).toHaveLength(1)
     expect(profile!.signals[0]!.evidence).toHaveLength(2)
+  })
+})
+
+describe('getFilterOptions', () => {
+  it('returns distinct sorted segments, signal types, and statuses for the lens', async () => {
+    const opts = await getFilterOptions(tdb.sql, 'tt')
+    expect(opts.signalTypes).toContain('entering-adoption')
+    expect(opts.segments).toContain('ehr-vendor')
+    expect(opts.statuses.length).toBeGreaterThan(0)
+    expect([...opts.segments].sort()).toEqual(opts.segments)
+  })
+
+  it('returns empty lists for a lens with no signals', async () => {
+    const opts = await getFilterOptions(tdb.sql, 'nope')
+    expect(opts).toEqual({ segments: [], signalTypes: [], statuses: [] })
   })
 })

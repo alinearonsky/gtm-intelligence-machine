@@ -55,3 +55,9 @@ export interface OrgAdminRow {
   ats: string | null; atsDetected: string | null; status: string
   consecutiveFailures: number; firstScannedAt: string | null; activePostings: number
 }
+
+export interface FilterOptions {
+  segments: string[]
+  signalTypes: string[]
+  statuses: string[]
+}

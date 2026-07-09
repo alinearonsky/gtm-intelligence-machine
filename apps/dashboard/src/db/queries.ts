@@ -1,5 +1,5 @@
 import type { Sql } from 'postgres'
-import type { FeedSignal, FeedFilters, OrgProfile, RunHealthRow, OrgAdminRow } from './types.ts'
+import type { FeedSignal, FeedFilters, OrgProfile, RunHealthRow, OrgAdminRow, FilterOptions } from './types.ts'
 
 function toFeedSignal(r: Record<string, unknown>): FeedSignal {
   return {
@@ -85,6 +85,17 @@ export async function getRunHealth(sql: Sql, limit = 30): Promise<RunHealthRow[]
     postingsRemoved: r.postings_removed as number,
     errors: (r.errors as { orgSlug: string; message: string }[]) ?? [],
   }))
+}
+
+export async function getFilterOptions(sql: Sql, lens: string): Promise<FilterOptions> {
+  const rows = await sql`
+    select distinct o.segment, s.signal_type, s.status
+    from signals s
+    join orgs o on o.id = s.org_id
+    join lens_scores ls on ls.signal_id = s.id and ls.lens = ${lens}`
+  const uniq = (key: 'segment' | 'signal_type' | 'status') =>
+    [...new Set(rows.map((r) => r[key] as string))].sort()
+  return { segments: uniq('segment'), signalTypes: uniq('signal_type'), statuses: uniq('status') }
 }
 
 export async function listOrgsAdmin(sql: Sql): Promise<OrgAdminRow[]> {

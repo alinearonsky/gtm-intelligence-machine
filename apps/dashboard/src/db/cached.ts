@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { getSql } from './connection.ts'
-import { getSignalFeed, getOrgProfile, getRunHealth, listOrgsAdmin } from './queries.ts'
+import { getSignalFeed, getOrgProfile, getRunHealth, listOrgsAdmin, getFilterOptions } from './queries.ts'
 import type { FeedFilters } from './types.ts'
 
 // Grill #8: data changes ~daily. Cache reads for an hour (Next data cache),
@@ -27,4 +27,12 @@ export function cachedRunHealth() {
 
 export function cachedOrgsAdmin() {
   return unstable_cache(() => listOrgsAdmin(getSql()), ['orgs-admin'], { revalidate: 3600, tags: ['orgs'] })()
+}
+
+export function cachedFilterOptions(lens: string) {
+  return unstable_cache(
+    () => getFilterOptions(getSql(), lens),
+    ['filter-options', lens],
+    { revalidate: 3600, tags: ['signals'] },
+  )()
 }
