@@ -45,3 +45,37 @@ describe('runInterpret (signals)', () => {
     expect((await s.listSignals(orgId))[0]!.isBaselineAssessment).toBe(true)
   })
 })
+
+describe('runInterpret (stale reconciliation)', () => {
+  it('soft-retires new signals whose rule stopped firing and resurrects them when it fires again', async () => {
+    const s = new MemoryStore()
+    const orgId = await seedExtracted(s, false)
+    await runInterpret({ store: s, rules })
+    expect((await s.listSignals(orgId)).find((r) => r.ruleId === 'first-terminology-hire')!.status).toBe('new')
+
+    // ontology iteration drops the rule → its signal must soft-retire
+    const withoutRule = { ...rules, version: rules.version + 1, rules: rules.rules.filter((r) => r.id !== 'first-terminology-hire') }
+    const second = await runInterpret({ store: s, rules: withoutRule })
+    expect(second.signalsRetired).toBeGreaterThan(0)
+    expect((await s.listSignals(orgId)).find((r) => r.ruleId === 'first-terminology-hire')!.status).toBe('stale')
+
+    // rule restored → the same signal resurrects to 'new' (no duplicate row)
+    const countBefore = (await s.listSignals(orgId)).length
+    await runInterpret({ store: s, rules })
+    const rows = await s.listSignals(orgId)
+    expect(rows.length).toBe(countBefore)
+    expect(rows.find((r) => r.ruleId === 'first-terminology-hire')!.status).toBe('new')
+  })
+
+  it('never retires curated signals (curation-safe)', async () => {
+    const s = new MemoryStore()
+    const orgId = await seedExtracted(s, false)
+    await runInterpret({ store: s, rules })
+    const target = (await s.listSignals(orgId)).find((r) => r.ruleId === 'first-terminology-hire')!
+    s.setSignalStatusForTest(target.id, 'reviewed')
+
+    const withoutRule = { ...rules, version: rules.version + 1, rules: rules.rules.filter((r) => r.id !== 'first-terminology-hire') }
+    await runInterpret({ store: s, rules: withoutRule })
+    expect((await s.listSignals(orgId)).find((r) => r.id === target.id)!.status).toBe('reviewed')
+  })
+})

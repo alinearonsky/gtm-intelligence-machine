@@ -24,14 +24,23 @@ export class MemoryStore implements Store {
   async upsertOrg(org: WatchlistOrgT): Promise<number> {
     const existing = this.bySlug.get(org.slug)
     if (existing !== undefined) {
-      this.orgs.set(existing, { ...this.orgs.get(existing)!, ...org, ats: org.ats })
+      this.orgs.set(existing, { ...this.orgs.get(existing)!, ...org, ats: org.ats, status: 'active' })
       return existing
     }
     const id = this.nextId++
-    this.orgs.set(id, { ...org, id, atsDetected: null, consecutiveFailures: 0 })
+    this.orgs.set(id, { ...org, id, atsDetected: null, consecutiveFailures: 0, status: 'active' })
     this.bySlug.set(org.slug, id)
     this.postings.set(id, new Map())
     return id
+  }
+
+  async retireAbsentOrgs(activeSlugs: string[]): Promise<number> {
+    const active = new Set(activeSlugs)
+    let retired = 0
+    for (const o of this.orgs.values()) {
+      if (o.status === 'active' && !active.has(o.slug)) { o.status = 'retired'; retired++ }
+    }
+    return retired
   }
 
   async getOrg(id: number) { return this.orgs.get(id) ?? null }
@@ -124,14 +133,37 @@ export class MemoryStore implements Store {
 
   async upsertSignal(rec: SignalRecord): Promise<number> {
     const existing = this.signals.find((s) => s.orgId === rec.orgId && s.ruleId === rec.ruleId && s.evidenceKey === rec.evidenceKey)
-    if (existing) { Object.assign(existing, rec); return existing.id }
+    if (existing) {
+      Object.assign(existing, rec)
+      // mirror postgres: 'stale' is the one machine-owned status a re-fire resurrects
+      if (existing.status === 'stale') existing.status = 'new'
+      return existing.id
+    }
     const id = this.nextSignalId++
-    this.signals.push({ ...rec, id })
+    this.signals.push({ ...rec, id, status: 'new' })
     return id
+  }
+
+  async retireStaleSignals(orgId: number, activeKeys: Array<{ ruleId: string; evidenceKey: string }>): Promise<number> {
+    // NUL separator: evidence keys derive from ATS external ids and may
+    // contain spaces — a printable join could collide across the tuple boundary
+    const active = new Set(activeKeys.map((k) => `${k.ruleId}\u0000${k.evidenceKey}`))
+    let retired = 0
+    for (const s of this.signals) {
+      if (s.orgId === orgId && s.status === 'new' && !active.has(`${s.ruleId}\u0000${s.evidenceKey}`)) {
+        s.status = 'stale'; retired++
+      }
+    }
+    return retired
   }
 
   async listSignals(orgId: number): Promise<SignalRow[]> {
     return this.signals.filter((s) => s.orgId === orgId).map((s) => ({ ...s }))
+  }
+
+  /** Test helper — not part of the Store interface. */
+  setSignalStatusForTest(id: number, status: string): void {
+    this.signals.find((s) => s.id === id)!.status = status
   }
 
   /** Test helper — not part of the Store interface. */

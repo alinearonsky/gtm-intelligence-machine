@@ -12,7 +12,8 @@ export class PostgresStore implements Store {
       values (${org.slug}, ${org.name}, ${org.domain}, ${org.segment}, ${org.products}, ${org.ats ?? null})
       on conflict (slug) do update set
         name = excluded.name, domain = excluded.domain, segment = excluded.segment,
-        products = excluded.products, ats = excluded.ats
+        products = excluded.products, ats = excluded.ats,
+        status = 'active'
       returning id`
     return rows[0]!.id as number
   }
@@ -24,7 +25,16 @@ export class PostgresStore implements Store {
       id: r.id, slug: r.slug, name: r.name, domain: r.domain, segment: r.segment,
       products: r.products, ats: r.ats ?? undefined,
       atsDetected: (r.ats_detected as AtsTypeT | null), consecutiveFailures: r.consecutive_failures,
+      status: r.status,
     }
+  }
+
+  async retireAbsentOrgs(activeSlugs: string[]): Promise<number> {
+    const rows = await this.sql`
+      update orgs set status = 'retired'
+      where status = 'active' and not (slug = any(${activeSlugs}::text[]))
+      returning id`
+    return rows.length
   }
 
   async setOrgAts(id: number, ats: AtsTypeT) { await this.sql`update orgs set ats_detected = ${ats} where id = ${id}` }
@@ -165,9 +175,10 @@ export class PostgresStore implements Store {
   }
 
   async upsertSignal(rec: SignalRecord): Promise<number> {
-    // INVARIANT: `status` is user-owned (set from the dashboard: reviewed/
-    // dismissed/acted). It MUST NOT appear in the update set below — a
-    // nightly re-fire on the same key must preserve the operator's curation.
+    // INVARIANT: curated `status` values (reviewed/dismissed/acted — set from
+    // the dashboard) are user-owned and MUST NOT be overwritten here. The one
+    // machine-owned transition is 'stale' → 'new': a rule firing again
+    // resurrects a signal that reconciliation had soft-retired.
     // Regression-guarded by packages/worker/test/signal-status.db.test.ts.
     const rows = await this.sql`
       insert into signals (org_id, signal_type, stage, strength, rule_id, evidence_key, evidence,
@@ -177,7 +188,8 @@ export class PostgresStore implements Store {
       on conflict (org_id, rule_id, evidence_key) do update set
         signal_type = excluded.signal_type, stage = excluded.stage, strength = excluded.strength,
         evidence = excluded.evidence, confidence = excluded.confidence,
-        is_baseline_assessment = excluded.is_baseline_assessment, rules_version = excluded.rules_version
+        is_baseline_assessment = excluded.is_baseline_assessment, rules_version = excluded.rules_version,
+        status = case when signals.status = 'stale' then 'new' else signals.status end
       returning id`
     return rows[0]!.id as number
   }
@@ -189,7 +201,22 @@ export class PostgresStore implements Store {
       strength: r.strength as number, ruleId: r.rule_id as string, evidenceKey: r.evidence_key as string,
       evidence: r.evidence, confidence: r.confidence as number,
       isBaselineAssessment: r.is_baseline_assessment as boolean, rulesVersion: r.rules_version as number,
+      status: r.status as string,
     }))
+  }
+
+  async retireStaleSignals(orgId: number, activeKeys: Array<{ ruleId: string; evidenceKey: string }>): Promise<number> {
+    const ruleIds = activeKeys.map((k) => k.ruleId)
+    const evidenceKeys = activeKeys.map((k) => k.evidenceKey)
+    const rows = await this.sql`
+      update signals set status = 'stale'
+      where org_id = ${orgId} and status = 'new'
+        and not exists (
+          select 1 from unnest(${ruleIds}::text[], ${evidenceKeys}::text[]) as k(rule_id, evidence_key)
+          where k.rule_id = signals.rule_id and k.evidence_key = signals.evidence_key
+        )
+      returning id`
+    return rows.length
   }
 
   async upsertLensScore(l: LensScoreRecord): Promise<void> {

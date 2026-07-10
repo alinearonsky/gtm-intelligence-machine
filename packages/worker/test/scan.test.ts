@@ -101,3 +101,23 @@ describe('runScan', () => {
     expect(summary.errors[0]!.message).toMatch(/no ATS detected/i)
   })
 })
+
+describe('org-status curation', () => {
+  it('retires orgs absent from the watchlist and reactivates them when re-added', async () => {
+    const store = new MemoryStore()
+    const adapter = fakeAdapter({ alpha: [p('1', 'Terminologist')], beta: [p('2', 'Ontologist')] })
+    const both: WatchlistT = { orgs: [org('alpha', 'greenhouse'), org('beta', 'greenhouse')] }
+    const onlyAlpha: WatchlistT = { orgs: [org('alpha', 'greenhouse')] }
+    const deps = { store, adapters: { greenhouse: adapter } as never, prefilter: PREFILTER, now: NOW }
+
+    await runScan(both, deps)
+    expect((await store.getOrg(2))!.status).toBe('active')
+
+    await runScan(onlyAlpha, deps)
+    expect((await store.getOrg(1))!.status).toBe('active')
+    expect((await store.getOrg(2))!.status).toBe('retired')
+
+    await runScan(both, deps)
+    expect((await store.getOrg(2))!.status).toBe('active')
+  })
+})

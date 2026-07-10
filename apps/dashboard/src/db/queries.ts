@@ -29,10 +29,14 @@ export async function getSignalFeed(sql: Sql, lens: string, f: FeedFilters): Pro
     from signals s
     join orgs o on o.id = s.org_id
     join lens_scores ls on ls.signal_id = s.id and ls.lens = ${lens}
-    where (${f.segment ?? null}::text is null or o.segment = ${f.segment ?? null})
+    where o.status = 'active'
+      and (${f.segment ?? null}::text is null or o.segment = ${f.segment ?? null})
       and (${f.signalType ?? null}::text is null or s.signal_type = ${f.signalType ?? null})
       and (${f.minStrength ?? null}::int is null or s.strength >= ${f.minStrength ?? null})
       and (${f.status ?? null}::text is null or s.status = ${f.status ?? null})
+      -- soft-retired signals stay out of the default feed; selecting the
+      -- 'stale' status filter surfaces them explicitly
+      and (${f.status ?? null}::text is not null or s.status <> 'stale')
     order by s.created_at desc, s.id desc`
   return rows.map(toFeedSignal)
 }
@@ -92,7 +96,8 @@ export async function getFilterOptions(sql: Sql, lens: string): Promise<FilterOp
     select distinct o.segment, s.signal_type, s.status
     from signals s
     join orgs o on o.id = s.org_id
-    join lens_scores ls on ls.signal_id = s.id and ls.lens = ${lens}`
+    join lens_scores ls on ls.signal_id = s.id and ls.lens = ${lens}
+    where o.status = 'active'`
   const uniq = (key: 'segment' | 'signal_type' | 'status') =>
     [...new Set(rows.map((r) => r[key] as string))].sort()
   return { segments: uniq('segment'), signalTypes: uniq('signal_type'), statuses: uniq('status') }

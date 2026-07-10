@@ -4,6 +4,7 @@ export interface OrgRow extends WatchlistOrgT {
   id: number
   atsDetected: AtsTypeT | null
   consecutiveFailures: number
+  status: string
 }
 
 export interface StoredPostingRow {
@@ -49,7 +50,7 @@ export interface SignalRecord {
   isBaselineAssessment: boolean
   rulesVersion: number
 }
-export interface SignalRow extends SignalRecord { id: number }
+export interface SignalRow extends SignalRecord { id: number; status: string }
 
 export interface LensScoreRecord {
   signalId: number
@@ -63,6 +64,8 @@ export interface Store {
   /** Insert or update by slug. The watchlist is authoritative: an omitted
    *  `ats` clears any previously-configured value (detection then applies). */
   upsertOrg(org: WatchlistOrgT): Promise<number>
+  /** Mark orgs not in the current watchlist as status 'retired'. Returns count retired. */
+  retireAbsentOrgs(activeSlugs: string[]): Promise<number>
   getOrg(id: number): Promise<OrgRow | null>
   setOrgAts(id: number, ats: AtsTypeT): Promise<void>
   setOrgFailures(id: number, consecutiveFailures: number): Promise<void>
@@ -87,6 +90,12 @@ export interface Store {
   getOrgExtractionFacts(orgId: number): Promise<OrgPostingFacts[]>
   /** Upsert a signal by (org_id, rule_id, evidence_key); returns its id. */
   upsertSignal(s: SignalRecord): Promise<number>
+  /**
+   * Soft-retire the org's signals whose (ruleId, evidenceKey) is not in
+   * activeKeys: status 'new' → 'stale'. Curated statuses (reviewed/dismissed/
+   * acted) are never touched. Returns count retired.
+   */
+  retireStaleSignals(orgId: number, activeKeys: Array<{ ruleId: string; evidenceKey: string }>): Promise<number>
   listSignals(orgId: number): Promise<SignalRow[]>
   /** Upsert a lens score by (signal_id, lens). */
   upsertLensScore(l: LensScoreRecord): Promise<void>

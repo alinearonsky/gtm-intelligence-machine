@@ -54,6 +54,11 @@ export async function runScan(watchlist: WatchlistT, deps: ScanDeps): Promise<Sc
     }
   }
 
+  // Orgs curated out of the watchlist YAML stop being scanned; mark them
+  // retired so the dashboard's active-only views drop them. Re-adding an org
+  // reactivates it via upsertOrg.
+  await deps.store.retireAbsentOrgs(watchlist.orgs.map((o) => o.slug))
+
   summary.finishedAt = deps.now()
   await deps.store.recordRun(summary)
   return summary

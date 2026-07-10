@@ -4,7 +4,7 @@ import { useRef, useEffect } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import type { FilterOptions } from '@/db/types'
 
-const FILTER_KEYS = ['segment', 'signalType', 'status', 'minStrength'] as const
+export const FILTER_KEYS = ['segment', 'signalType', 'status', 'minStrength'] as const
 
 function Select({ label, param, value, children, onChange }: {
   label: string; param: string; value: string

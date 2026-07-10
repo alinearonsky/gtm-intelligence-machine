@@ -58,4 +58,58 @@ describe('signal upsert preserves user-owned status', () => {
     expect(res.rows[0]!.status).toBe('dismissed') // user's curation survives
     expect(res.rows[0]!.strength).toBe(5)          // rule fields still refresh
   })
+
+  it("a re-fire resurrects a 'stale' signal to 'new' (the one machine-owned transition)", async () => {
+    const rec: SignalRecord = {
+      orgId: 1, signalType: 'entering-adoption', stage: 'early', strength: 4,
+      ruleId: 'first-terminology-hire', evidenceKey: 'k2',
+      evidence: [{ externalId: 'x2', url: 'https://a.example/x2', quote: 'q' }],
+      confidence: 0.9, isBaselineAssessment: false, rulesVersion: 1,
+    }
+    const id = await store.upsertSignal(rec)
+    await db.query(`update signals set status = 'stale' where id = $1`, [id])
+    await store.upsertSignal(rec)
+    const res = await db.query<{ status: string }>(`select status from signals where id = $1`, [id])
+    expect(res.rows[0]!.status).toBe('new')
+  })
+
+  it('retireStaleSignals stales only new signals absent from activeKeys', async () => {
+    const rec = (evidenceKey: string): SignalRecord => ({
+      orgId: 1, signalType: 'entering-adoption', stage: 'early', strength: 4,
+      ruleId: 'first-terminology-hire', evidenceKey,
+      evidence: [{ externalId: 'x', url: 'https://a.example/x', quote: 'q' }],
+      confidence: 0.9, isBaselineAssessment: false, rulesVersion: 1,
+    })
+    const keep = await store.upsertSignal(rec('keep'))
+    const drop = await store.upsertSignal(rec('drop'))
+    const curated = await store.upsertSignal(rec('curated'))
+    await db.query(`update signals set status = 'new' where id = any($1)`, [[keep, drop]])
+    await db.query(`update signals set status = 'reviewed' where id = $1`, [curated])
+
+    // 'k2' from the resurrect test above is also status 'new' for org 1 — keep
+    // it active here so this test only retires 'drop'.
+    const retired = await store.retireStaleSignals(1, [
+      { ruleId: 'first-terminology-hire', evidenceKey: 'keep' },
+      { ruleId: 'first-terminology-hire', evidenceKey: 'k2' },
+    ])
+    expect(retired).toBe(1)
+    const res = await db.query<{ id: number; status: string }>(`select id, status from signals where id = any($1) order by id`, [[keep, drop, curated]])
+    const byId = new Map(res.rows.map((r) => [r.id, r.status]))
+    expect(byId.get(keep)).toBe('new')
+    expect(byId.get(drop)).toBe('stale')
+    expect(byId.get(curated)).toBe('reviewed')
+  })
+
+  it('empty activeKeys retires every new signal of the org (all rules stopped firing)', async () => {
+    // state from the tests above: k2 + keep are 'new'; k1 dismissed, curated reviewed, drop stale
+    const retired = await store.retireStaleSignals(1, [])
+    expect(retired).toBe(2)
+    const res = await db.query<{ status: string; n: string }>(
+      `select status, count(*) as n from signals where org_id = 1 group by status`)
+    const byStatus = new Map(res.rows.map((r) => [r.status, Number(r.n)]))
+    expect(byStatus.get('new') ?? 0).toBe(0)
+    expect(byStatus.get('stale')).toBe(3)
+    expect(byStatus.get('dismissed')).toBe(1)
+    expect(byStatus.get('reviewed')).toBe(1)
+  })
 })

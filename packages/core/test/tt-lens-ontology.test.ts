@@ -13,9 +13,18 @@ describe('shipped tt.yaml', () => {
   it('mid-implementation at strength 5 is act-now', () => {
     expect(scoreSignal({ ...base, signalType: 'mid-implementation', strength: 5 }, tt).priority).toBe('act-now')
   })
-  it('a payer segment is not act-now for the TT lens', () => {
-    // payer isn't in the act-now segment list, and entering-adoption has no other rule → default ignore
-    expect(scoreSignal({ ...base, segment: 'payer' }, tt).priority).toBe('ignore')
+  it('a payer segment is watch, not act-now, for strong adoption signals', () => {
+    // payer isn't in the act-now segment list; the v2 fallback routes strong
+    // out-of-segment adoption to watch (rubric decision 2026-07-09)
+    expect(scoreSignal({ ...base, segment: 'payer' }, tt).priority).toBe('watch')
+    expect(scoreSignal({ ...base, segment: 'other', signalType: 'mid-implementation', strength: 1 }, tt).priority).toBe('watch')
+  })
+  it('in-segment strong adoption still routes act-now ahead of the fallback', () => {
+    expect(scoreSignal({ ...base, segment: 'ehr-vendor' }, tt).priority).toBe('act-now')
+  })
+  it('in-segment adoption below act-now strength lands on the watch fallback (v2 change)', () => {
+    // v1 scored this ignore; v2 deliberately routes weak in-segment adoption to watch
+    expect(scoreSignal({ ...base, strength: 2 }, tt).priority).toBe('watch')
   })
   it('every shipped signal_type resolves to a non-throwing score', () => {
     for (const st of ['entering-adoption', 'integration-starting', 'mid-implementation', 'strategic-commitment',

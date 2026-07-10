@@ -1,7 +1,7 @@
 # ontology/lenses/tt.yaml — Terminology Tool product lens (v1). Maps signal
 # types to sales priority for the TT trials motion. First matching rule wins;
 # baseline assessments are capped to `watch` by the scorer regardless.
-version: 1
+version: 2
 lens: tt
 label: Terminology Tool
 default_priority: ignore
@@ -11,6 +11,14 @@ rules:
     min_strength: 3
     priority: act-now
     rationale: "{org}: {signalType} (strength {strength}) — actively building clinical-terminology capability. Prime Terminology Tool trial window."
+  # v2 (2026-07-09): adoption-signal fallback — an org actively building
+  # terminology capability must not score below one doing nothing. Watch, not
+  # act-now. Reached by out-of-segment orgs (payer/other) at any strength AND
+  # by in-segment orgs below the act-now rule's min_strength 3.
+  - signal_types: [entering-adoption, mid-implementation]
+    min_strength: 1
+    priority: watch
+    rationale: "{org}: {signalType} (strength {strength}) in a segment outside the TT act-now motion — strong terminology movement worth monitoring."
   - signal_types: [implementation-staffed]
     min_strength: 1
     priority: watch

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { FILTER_KEYS } from './filter-bar'
 
 // v1: only 'tt' has data. Lens-agnostic so 'ckms' drops in later.
 const LENSES = [{ id: 'tt', label: 'Terminology Tool' }]
@@ -16,6 +17,9 @@ export function LensSwitcher() {
       {LENSES.map((l) => {
         const next = new URLSearchParams(sp)
         next.set('lens', l.id)
+        // filter values are lens-scoped; carrying them across lenses can
+        // leave the feed filtered by an invisible, invalid value
+        for (const k of FILTER_KEYS) next.delete(k)
         return (
           <Link key={l.id} href={`${pathname}?${next.toString()}`}
             aria-current={l.id === active ? 'true' : undefined}

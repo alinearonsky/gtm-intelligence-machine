@@ -53,3 +53,32 @@ describe('getFilterOptions', () => {
     expect(opts).toEqual({ segments: [], signalTypes: [], statuses: [] })
   })
 })
+
+describe('retired orgs in the feed', () => {
+  it("excludes retired orgs' signals and filter options", async () => {
+    await tdb.sql`update orgs set status = 'retired' where slug = 'beta-labs'`
+    try {
+      const feed = await getSignalFeed(tdb.sql, 'tt', {})
+      expect(feed.map((s) => s.orgSlug)).not.toContain('beta-labs')
+      const opts = await getFilterOptions(tdb.sql, 'tt')
+      expect(opts.signalTypes).not.toContain('entering-adoption')
+    } finally {
+      await tdb.sql`update orgs set status = 'active' where slug = 'beta-labs'`
+    }
+  })
+})
+
+describe('stale signals in the feed', () => {
+  it('excludes stale by default, includes them when the status filter asks', async () => {
+    await tdb.sql`update signals set status = 'stale' where id = (
+      select s.id from signals s join orgs o on o.id = s.org_id where o.slug = 'beta-labs' limit 1)`
+    try {
+      const feed = await getSignalFeed(tdb.sql, 'tt', {})
+      expect(feed.map((s) => s.orgSlug)).not.toContain('beta-labs')
+      const stale = await getSignalFeed(tdb.sql, 'tt', { status: 'stale' })
+      expect(stale.map((s) => s.orgSlug)).toContain('beta-labs')
+    } finally {
+      await tdb.sql`update signals set status = 'new' where status = 'stale'`
+    }
+  })
+})

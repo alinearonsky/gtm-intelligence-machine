@@ -12,10 +12,11 @@ export interface InterpretSummary {
   orgsProcessed: number
   signalsWritten: number
   lensScoresWritten: number
+  signalsRetired: number
 }
 
 export async function runInterpret(deps: InterpretDeps): Promise<InterpretSummary> {
-  const summary: InterpretSummary = { orgsProcessed: 0, signalsWritten: 0, lensScoresWritten: 0 }
+  const summary: InterpretSummary = { orgsProcessed: 0, signalsWritten: 0, lensScoresWritten: 0, signalsRetired: 0 }
   for (const orgId of await deps.store.listOrgIds()) {
     const org = await deps.store.getOrg(orgId)
     if (!org) continue
@@ -35,7 +36,11 @@ export async function runInterpret(deps: InterpretDeps): Promise<InterpretSummar
         summary.lensScoresWritten++
       }
     }
+    // Reconciliation: 'new' signals whose (rule, evidence) draft no longer
+    // exists soft-retire to 'stale'; curated statuses are never touched.
+    summary.signalsRetired += await deps.store.retireStaleSignals(
+      orgId, drafts.map((d) => ({ ruleId: d.ruleId, evidenceKey: d.evidenceKey })))
   }
-  deps.log?.(`interpret: ${summary.signalsWritten} signals, ${summary.lensScoresWritten} lens scores across ${summary.orgsProcessed} orgs`)
+  deps.log?.(`interpret: ${summary.signalsWritten} signals, ${summary.lensScoresWritten} lens scores, ${summary.signalsRetired} retired across ${summary.orgsProcessed} orgs`)
   return summary
 }
