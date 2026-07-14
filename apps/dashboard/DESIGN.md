@@ -41,10 +41,17 @@ All values are CSS variables consumed through Tailwind. Never hard-code a hex.
     dashboard doubles as the "urgent" semantic.
   - `--priority-watch` (violet) — real movement, monitor.
   - `--priority-ignore` / `--baseline` (neutral grey) — snapshot, not an event.
+- **Fill vs text split (accessibility):** the bright `--priority-*` values (L≈0.72
+  coral, L≈0.58 watch) are *fill/border* brightnesses — they fail WCAG AA as text on
+  light surfaces (coral = 2.49:1). Any priority color used as **text** (pill labels,
+  the runs failed-count, watchlist alert values, error cells) must use the darker
+  `--priority-act-now-fg` / `--priority-watch-fg` shades (≥5.5:1). Stripes and 10%
+  fills keep the signature brightness; text darkens. Coral-on-navy (the private-console
+  badge) stays bright — it's light-on-dark and already high-contrast.
 - **Radius:** `rounded-md` for tiles/logos, `rounded-lg` for cards/containers, `rounded-full` for pills.
 
 Priority color appears in exactly two places per card: the left border (`border-l-2`)
-and the priority pill. Nowhere else — that is what keeps the amber meaningful.
+and the priority pill. Nowhere else — that is what keeps the coral meaningful.
 
 ## 2. Primitives
 

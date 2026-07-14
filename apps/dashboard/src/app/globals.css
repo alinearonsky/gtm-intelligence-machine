@@ -39,7 +39,9 @@
     --color-foreground: var(--foreground);
     --color-background: var(--background);
     --color-priority-act-now: var(--priority-act-now);
+    --color-priority-act-now-fg: var(--priority-act-now-fg);
     --color-priority-watch: var(--priority-watch);
+    --color-priority-watch-fg: var(--priority-watch-fg);
     --color-priority-ignore: var(--priority-ignore);
     --color-baseline: var(--baseline);
     --font-mono: var(--font-geist-mono);
@@ -92,11 +94,16 @@
     --sidebar-accent-foreground: oklch(0.98 0 0);
     --sidebar-border: oklch(0.32 0.03 264);
     --sidebar-ring: oklch(0.56 0.19 270);
-    /* Act-now = Stellate's signature coral #FF7752 — the one warm accent, still "urgent". */
+    /* Act-now = Stellate's signature coral #FF7752 — the one warm accent, still "urgent".
+       The bright L0.72 coral is a FILL/border brightness. On light backgrounds it fails
+       WCAG AA as text (2.49:1), so pill/inline TEXT uses the darker -fg shade below while
+       stripes and fills keep the signature brightness. */
     --priority-act-now: oklch(0.72 0.175 40);
+    --priority-act-now-fg: oklch(0.52 0.17 40);
     --priority-watch: oklch(0.58 0.16 250);
+    --priority-watch-fg: oklch(0.5 0.17 262);
     --priority-ignore: oklch(0.55 0.02 262);
-    --baseline: oklch(0.70 0.02 260);
+    --baseline: oklch(0.52 0.02 260);
 }
 
 .dark {
@@ -132,9 +139,11 @@
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
     --priority-act-now: oklch(0.74 0.16 42);
+    --priority-act-now-fg: oklch(0.78 0.15 44);
     --priority-watch: oklch(0.68 0.19 276.9);
+    --priority-watch-fg: oklch(0.72 0.17 276.9);
     --priority-ignore: oklch(0.65 0 0);
-    --baseline: oklch(0.55 0 0);
+    --baseline: oklch(0.6 0 0);
 }
 
 @layer base {
@@ -155,4 +164,26 @@
   html {
     @apply font-sans;
     }
+}
+
+/* Confirmation pop for the copy-brief action — the one moment the product exists
+   to produce. A quick settle, not a bounce; ease-out only. */
+@keyframes check-in {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-check-in {
+  animation: check-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Motion is state, not decoration — but honor users who opt out entirely. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

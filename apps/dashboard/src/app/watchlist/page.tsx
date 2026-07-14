@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 function Stat({ label, value, tone }: { label: string; value: string | number; tone?: 'alert' }) {
   return (
     <div className="rounded-lg border bg-card px-4 py-3">
-      <div className={cn('font-mono text-lg tabular-nums', tone === 'alert' && 'text-priority-act-now')}>{value}</div>
+      <div className={cn('font-mono text-lg tabular-nums', tone === 'alert' && 'text-priority-act-now-fg')}>{value}</div>
       <div className="text-xs text-muted-foreground">{label}</div>
     </div>
   )
@@ -77,7 +77,7 @@ export default async function MonitoringPage() {
                   {o.consecutiveFailures >= 3
                     ? <Badge variant="destructive">needs attention</Badge>
                     : o.consecutiveFailures >= 1
-                      ? <span className="rounded-full border border-priority-act-now/40 bg-priority-act-now/10 px-2 py-0.5 font-mono text-[11px] text-priority-act-now">failing ×{o.consecutiveFailures}</span>
+                      ? <span className="rounded-full border border-priority-act-now/40 bg-priority-act-now/10 px-2 py-0.5 font-mono text-[11px] text-priority-act-now-fg">failing ×{o.consecutiveFailures}</span>
                       : <Badge variant="secondary">healthy</Badge>}
                 </TableCell>
               </TableRow>
