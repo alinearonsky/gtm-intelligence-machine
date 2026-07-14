@@ -13,14 +13,17 @@ export default async function RunsPage() {
       <div className="space-y-1">
         <Link href="/watchlist" className="text-xs text-muted-foreground hover:text-foreground">← Monitoring</Link>
         <h1 className="text-xl font-semibold tracking-tight">Scan history</h1>
+        <p className="text-sm text-muted-foreground">
+          Each nightly scan — how many companies were checked and what changed in their job postings.
+        </p>
       </div>
       {runs.length === 0 && <EmptyState message="No scan runs recorded yet." />}
       {runs.length > 0 && (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Finished</TableHead><TableHead>Orgs</TableHead><TableHead>Failed</TableHead>
-              <TableHead>New</TableHead><TableHead>Removed</TableHead><TableHead>Errors</TableHead>
+              <TableHead>Finished</TableHead><TableHead>Companies</TableHead><TableHead>Failed</TableHead>
+              <TableHead>New postings</TableHead><TableHead>Removed</TableHead><TableHead>Errors</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
