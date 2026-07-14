@@ -31,20 +31,22 @@ const base: FeedSignal = {
 }
 
 describe('SignalCard', () => {
-  it('renders humanized signal type, strength, rationale, and priority', () => {
+  it('renders the signal type, what-it-means, implications, and an evidence link', () => {
     render(<SignalCard signal={base} />)
     expect(screen.getByText('Entering adoption')).toBeInTheDocument()
-    expect(screen.getByLabelText('strength 4 of 5')).toBeInTheDocument()
-    expect(screen.getByText(/Beta Labs: prime trial window\./)).toBeInTheDocument()
+    expect(screen.getByText('What it means')).toBeInTheDocument()
+    expect(screen.getByText(/first clinical-terminology role/i)).toBeInTheDocument()
+    expect(screen.getByText('Implications')).toBeInTheDocument()
     expect(screen.getByText('Act now')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /1 evidence/i })).toBeInTheDocument()
+    expect(screen.getByText(/buying window is open/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /view evidence/i })).toBeInTheDocument()
   })
 
-  it('displays a baseline assessment with its (non-act-now) priority + a baseline badge', () => {
+  it('shows the non-act-now priority and its watch implication for a watch signal', () => {
     render(<SignalCard signal={{ ...base, isBaselineAssessment: true, priority: 'watch' }} />)
     expect(screen.queryByText('Act now')).not.toBeInTheDocument()
     expect(screen.getByText('Watch')).toBeInTheDocument()
-    expect(screen.getByText(/baseline/i)).toBeInTheDocument()
+    expect(screen.getByText(/outside the act-now motion/i)).toBeInTheDocument()
   })
 
   it('renders an in-card footer when provided', () => {

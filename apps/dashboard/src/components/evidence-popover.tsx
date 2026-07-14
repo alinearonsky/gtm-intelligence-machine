@@ -24,14 +24,23 @@ export function EvidenceList({ evidence }: { evidence: EvidenceItem[] }) {
   )
 }
 
-export function EvidencePopover({ evidence }: { evidence: EvidenceItem[] }) {
+export function EvidencePopover({ evidence, asLink = false }: { evidence: EvidenceItem[]; asLink?: boolean }) {
   return (
     <Popover>
       <PopoverTrigger
         render={
-          <Button variant="ghost" size="sm">
-            {evidence.length} evidence
-          </Button>
+          asLink ? (
+            <button
+              type="button"
+              className="text-xs font-medium text-primary underline-offset-4 hover:underline"
+            >
+              View evidence{evidence.length > 1 ? ` (${evidence.length})` : ''} →
+            </button>
+          ) : (
+            <Button variant="ghost" size="sm">
+              {evidence.length} evidence
+            </Button>
+          )
         }
       />
       <PopoverContent className="w-96">
