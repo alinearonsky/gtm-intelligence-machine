@@ -3,7 +3,7 @@ import { buildOutreachBrief } from './brief.ts'
 import type { FeedSignal } from '../db/types.ts'
 
 const signal: FeedSignal = {
-  id: 1, orgId: 10, orgSlug: 'beta-labs', orgName: 'Beta Labs', segment: 'ehr-vendor',
+  id: 1, orgId: 10, orgSlug: 'beta-labs', orgName: 'Beta Labs', domain: 'beta.example', segment: 'ehr-vendor',
   signalType: 'entering-adoption', stage: 'early', strength: 4, confidence: 0.9,
   isBaselineAssessment: false, status: 'new', createdAt: '2026-07-01T00:00:00.000Z',
   priority: 'act-now', rationale: 'Beta Labs: prime trial window.',

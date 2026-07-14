@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { cachedRunHealth } from '@/db/cached'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ErrorCell } from '@/components/error-cell'
@@ -9,7 +10,10 @@ export default async function RunsPage() {
   const runs = await cachedRunHealth()
   return (
     <main className="mx-auto max-w-4xl space-y-4 p-6">
-      <h1 className="text-xl font-semibold tracking-tight">Run health</h1>
+      <div className="space-y-1">
+        <Link href="/watchlist" className="text-xs text-muted-foreground hover:text-foreground">← Monitoring</Link>
+        <h1 className="text-xl font-semibold tracking-tight">Scan history</h1>
+      </div>
       {runs.length === 0 && <EmptyState message="No scan runs recorded yet." />}
       {runs.length > 0 && (
         <Table>

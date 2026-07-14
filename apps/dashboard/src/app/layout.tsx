@@ -4,8 +4,8 @@ import { Suspense } from 'react'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { Nav } from '@/components/nav'
 import { LensSwitcher } from '@/components/lens-switcher'
+import { SiteFooter } from '@/components/site-footer'
 import { isPrivate } from '@/lib/instance'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
@@ -22,13 +22,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const priv = isPrivate()
   return (
     <html lang="en" className={cn('font-sans', geist.variable, geistMono.variable)}>
-      <body>
+      <body className="flex min-h-screen flex-col">
         <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2.5">
-            <div className="flex items-center gap-6">
-              <Link href="/" className="text-sm font-semibold tracking-tight">GTM Intelligence</Link>
-              <Nav />
-            </div>
+            <Link href="/" className="text-sm font-semibold tracking-tight">GTM Intelligence</Link>
             <div className="flex items-center gap-3">
               <Suspense fallback={null}>
                 <LensSwitcher />
@@ -42,7 +39,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        {children}
+        <div className="flex-1">{children}</div>
+        <SiteFooter />
       </body>
     </html>
   )

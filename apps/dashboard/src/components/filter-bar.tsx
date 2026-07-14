@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { segmentLabel, signalTypeLabel } from '@/lib/humanize'
 import type { FilterOptions } from '@/db/types'
 
 export const FILTER_KEYS = ['segment', 'signalType', 'status', 'minStrength'] as const
@@ -60,11 +61,11 @@ export function FilterBar({ options }: { options: FilterOptions }) {
     <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-card px-3 py-2">
       <Select label="Segment" param="segment" value={sp.get('segment') ?? ''} onChange={set}>
         <option value="">All</option>
-        {options.segments.map((s) => <option key={s} value={s}>{s}</option>)}
+        {options.segments.map((s) => <option key={s} value={s}>{segmentLabel(s)}</option>)}
       </Select>
       <Select label="Signal type" param="signalType" value={sp.get('signalType') ?? ''} onChange={set}>
         <option value="">All</option>
-        {options.signalTypes.map((s) => <option key={s} value={s}>{s}</option>)}
+        {options.signalTypes.map((s) => <option key={s} value={s}>{signalTypeLabel(s)}</option>)}
       </Select>
       <Select label="Status" param="status" value={sp.get('status') ?? ''} onChange={set}>
         <option value="">All</option>

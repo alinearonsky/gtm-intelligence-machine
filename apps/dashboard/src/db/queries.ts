@@ -7,6 +7,7 @@ function toFeedSignal(r: Record<string, unknown>): FeedSignal {
     orgId: r.org_id as number,
     orgSlug: r.org_slug as string,
     orgName: r.org_name as string,
+    domain: r.domain as string,
     segment: r.segment as string,
     signalType: r.signal_type as string,
     stage: r.stage as string,
@@ -23,7 +24,7 @@ function toFeedSignal(r: Record<string, unknown>): FeedSignal {
 
 export async function getSignalFeed(sql: Sql, lens: string, f: FeedFilters): Promise<FeedSignal[]> {
   const rows = await sql`
-    select s.id, s.org_id, o.slug as org_slug, o.name as org_name, o.segment,
+    select s.id, s.org_id, o.slug as org_slug, o.name as org_name, o.domain, o.segment,
            s.signal_type, s.stage, s.strength, s.confidence, s.is_baseline_assessment,
            s.status, s.created_at, s.evidence, ls.priority, ls.rationale
     from signals s
@@ -32,6 +33,7 @@ export async function getSignalFeed(sql: Sql, lens: string, f: FeedFilters): Pro
     where o.status = 'active'
       and (${f.segment ?? null}::text is null or o.segment = ${f.segment ?? null})
       and (${f.signalType ?? null}::text is null or s.signal_type = ${f.signalType ?? null})
+      and (${f.priority ?? null}::text is null or ls.priority = ${f.priority ?? null})
       and (${f.minStrength ?? null}::int is null or s.strength >= ${f.minStrength ?? null})
       and (${f.status ?? null}::text is null or s.status = ${f.status ?? null})
       -- soft-retired signals stay out of the default feed; selecting the
@@ -47,7 +49,7 @@ export async function getOrgProfile(sql: Sql, slug: string, lens: string): Promi
   if (!o) return null
 
   const signalRows = await sql`
-    select s.id, s.org_id, o.slug as org_slug, o.name as org_name, o.segment,
+    select s.id, s.org_id, o.slug as org_slug, o.name as org_name, o.domain, o.segment,
            s.signal_type, s.stage, s.strength, s.confidence, s.is_baseline_assessment,
            s.status, s.created_at, s.evidence, ls.priority, ls.rationale
     from signals s

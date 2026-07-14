@@ -16,6 +16,7 @@ const base: FeedSignal = {
   orgId: 10,
   orgSlug: 'beta-labs',
   orgName: 'Beta Labs',
+  domain: 'beta.example',
   segment: 'ehr-vendor',
   signalType: 'entering-adoption',
   stage: 'early',
@@ -30,20 +31,20 @@ const base: FeedSignal = {
 }
 
 describe('SignalCard', () => {
-  it('renders org, signal type, strength, rationale, and priority', () => {
+  it('renders org, humanized signal type, strength, rationale, and priority', () => {
     render(<SignalCard signal={base} />)
     expect(screen.getByText('Beta Labs')).toBeInTheDocument()
-    expect(screen.getByText('entering-adoption')).toBeInTheDocument()
+    expect(screen.getByText('Entering adoption')).toBeInTheDocument()
     expect(screen.getByLabelText('strength 4 of 5')).toBeInTheDocument()
     expect(screen.getByText(/Beta Labs: prime trial window\./)).toBeInTheDocument()
-    expect(screen.getByText('act-now')).toBeInTheDocument()
+    expect(screen.getByText('Act now')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /1 evidence/i })).toBeInTheDocument()
   })
 
   it('displays a baseline assessment with its (non-act-now) priority + a baseline badge', () => {
     render(<SignalCard signal={{ ...base, isBaselineAssessment: true, priority: 'watch' }} />)
-    expect(screen.queryByText('act-now')).not.toBeInTheDocument()
-    expect(screen.getByText('watch')).toBeInTheDocument()
+    expect(screen.queryByText('Act now')).not.toBeInTheDocument()
+    expect(screen.getByText('Watch')).toBeInTheDocument()
     expect(screen.getByText(/baseline/i)).toBeInTheDocument()
   })
 

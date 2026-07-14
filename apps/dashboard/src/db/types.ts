@@ -7,6 +7,7 @@ export interface FeedSignal {
   orgId: number
   orgSlug: string
   orgName: string
+  domain: string
   segment: string
   signalType: string
   stage: string
@@ -25,6 +26,7 @@ export interface FeedFilters {
   signalType?: string
   minStrength?: number
   status?: string
+  priority?: string
 }
 
 export interface OrgProfile {

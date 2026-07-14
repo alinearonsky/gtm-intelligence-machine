@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { EvidencePopover } from './evidence-popover'
 import { StrengthDots } from './strength-dots'
+import { signalTypeLabel, stageLabel, stageHint, segmentLabel, priorityLabel } from '@/lib/humanize'
 import type { FeedSignal } from '@/db/types'
 import type { PriorityT } from '@gtm/core'
 
@@ -29,19 +30,19 @@ export function SignalCard({ signal, footer }: { signal: FeedSignal; footer?: Re
             <Link href={`/orgs/${signal.orgSlug}`} className="font-semibold tracking-tight hover:underline">
               {signal.orgName}
             </Link>
-            <Badge variant="outline" className="font-mono text-[11px] font-normal text-muted-foreground">
-              {signal.segment}
+            <Badge variant="outline" className="text-[11px] font-normal text-muted-foreground">
+              {segmentLabel(signal.segment)}
             </Badge>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="font-mono">{signal.signalType}</span>
-            <span>{signal.stage}</span>
+            <span className="font-medium text-foreground">{signalTypeLabel(signal.signalType)}</span>
+            <span title={stageHint(signal.stage)}>{stageLabel(signal.stage)}</span>
             <StrengthDots value={signal.strength} />
           </div>
         </div>
-        <span className={cn('rounded-full border px-2 py-0.5 font-mono text-[11px]',
+        <span className={cn('rounded-full border px-2.5 py-1 text-xs font-medium',
           PRIORITY_PILL[signal.priority] ?? PRIORITY_PILL.ignore)}>
-          {signal.priority}
+          {priorityLabel(signal.priority)}
         </span>
       </CardHeader>
       <CardContent className="space-y-3">
