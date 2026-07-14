@@ -1,5 +1,6 @@
 import { contentHash, type PostingDiff, type RawPostingT, type WatchlistOrgT, type AtsTypeT, type ExtractionT, type OrgPostingFacts } from '@gtm/core'
-import type { ApplyDiffMeta, ExtractionMeta, LensScoreRecord, OrgRow, ScanRunResult, SignalRecord, SignalRow, Store, StoredPostingRow } from './types.ts'
+import type { ApplyDiffMeta, ExtractionMeta, LensScoreRecord, OrgNarrativeRecord, OrgRow, ScanRunResult, SignalRecord, SignalRow, Store, StoredPostingRow } from './types.ts'
+import type { OrgNarrativeInput } from '../narrate/signature.ts'
 
 interface MemExtraction { ext: ExtractionT; status: 'ok' | 'failed'; promptVersion: string; model: string; createdAt: string }
 interface MemPosting extends StoredPostingRow {
@@ -20,6 +21,7 @@ export class MemoryStore implements Store {
   private signals: SignalRow[] = []
   private nextSignalId = 1
   private lensScores: LensScoreRecord[] = []
+  private narratives = new Map<string, { record: OrgNarrativeRecord }>() // key `${orgId}:${lens}`
 
   async upsertOrg(org: WatchlistOrgT): Promise<number> {
     const existing = this.bySlug.get(org.slug)
@@ -177,4 +179,38 @@ export class MemoryStore implements Store {
 
   /** Test helper — not part of the Store interface. */
   dumpLensScores(): LensScoreRecord[] { return this.lensScores.map((s) => ({ ...s })) }
+
+  async getOrgNarrativeInput(orgId: number, lens: string): Promise<OrgNarrativeInput | null> {
+    const org = this.orgs.get(orgId)
+    if (!org) return null
+    const signals = this.signals
+      .filter((s) => s.orgId === orgId && s.status !== 'stale' && s.status !== 'dismissed')
+      .map((s) => {
+        const score = this.lensScores.find((l) => l.signalId === s.id && l.lens === lens)
+        return score ? {
+          signalType: s.signalType, stage: s.stage, strength: s.strength, status: s.status,
+          isBaselineAssessment: s.isBaselineAssessment, priority: score.priority, rationale: score.rationale,
+        } : null
+      })
+      .filter((s): s is NonNullable<typeof s> => s !== null)
+    if (signals.length === 0) return null
+
+    const facts = (await this.getOrgExtractionFacts(orgId))
+    const standards = [...new Set(facts.flatMap((f) => f.standardsMentioned))].sort()
+    const roleCategories = [...new Set(facts.map((f) => f.roleCategory).filter((r) => r !== 'none'))].sort()
+    const newFunctionCount = facts.filter((f) => f.functionType === 'new-function').length
+    return {
+      orgId, lens, orgName: org.name, segment: org.segment,
+      signals, standards, roleCategories, newFunctionCount,
+      baselineOnly: signals.every((s) => s.isBaselineAssessment),
+    }
+  }
+
+  async getStoredNarrativeSignature(orgId: number, lens: string): Promise<string | null> {
+    return this.narratives.get(`${orgId}:${lens}`)?.record.sourceSignature ?? null
+  }
+
+  async upsertOrgNarrative(rec: OrgNarrativeRecord): Promise<void> {
+    this.narratives.set(`${rec.orgId}:${rec.lens}`, { record: { ...rec } })
+  }
 }
