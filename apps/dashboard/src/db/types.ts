@@ -37,10 +37,13 @@ export interface OrgProfile {
   segment: string
   products: string[]
   status: string
+  narrative: string | null
   signals: FeedSignal[]
   postings: {
     externalId: string; title: string; url: string; location: string | null
     department: string | null; isBaseline: boolean; firstSeen: string; removedAt: string | null
+    seniority: string | null; clinicalDomain: string | null; teamContext: string | null
+    standards: string[]; functionType: string | null; confidence: number | null
   }[]
 }
 
