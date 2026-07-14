@@ -1,8 +1,9 @@
-import { cachedSignalFeed, cachedFilterOptions } from '@/db/cached'
+import { cachedSignalFeed, cachedFilterOptions, cachedRunHealth } from '@/db/cached'
 import { OrgSignalCard } from '@/components/org-signal-card'
 import { PriorityTabs } from '@/components/priority-tabs'
 import { FilterBar } from '@/components/filter-bar'
 import { EmptyState } from '@/components/empty-state'
+import { FreshnessCue } from '@/components/freshness-cue'
 import { groupFeedByOrg } from '@/lib/group-feed'
 import { isPrivate } from '@/lib/instance'
 
@@ -15,7 +16,7 @@ export default async function Home({ searchParams }: {
   const p = await searchParams
   const lens = p.lens ?? 'tt'
   const minStrengthNum = p.minStrength ? Number(p.minStrength) : undefined
-  const [feed, filterOptions] = await Promise.all([
+  const [feed, filterOptions, runs] = await Promise.all([
     cachedSignalFeed(lens, {
       segment: p.segment,
       signalType: p.signalType,
@@ -24,17 +25,22 @@ export default async function Home({ searchParams }: {
       priority: p.priority,
     }),
     cachedFilterOptions(lens),
+    cachedRunHealth(),
   ])
   const orgs = groupFeedByOrg(feed)
   const canWrite = isPrivate()
+  const lastScan = runs[0]?.finishedAt
 
   return (
     <main className="mx-auto max-w-4xl space-y-5 px-8 py-6">
-      <div className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">Companies to watch</h1>
-        <p className="text-sm text-muted-foreground">
-          Healthtech orgs whose hiring shows they may be entering a buying window — highest-priority first.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-xl font-semibold tracking-tight">Companies to watch</h1>
+          <p className="text-sm text-muted-foreground">
+            Healthtech orgs whose hiring shows they may be entering a buying window — highest-priority first.
+          </p>
+        </div>
+        {lastScan && <FreshnessCue finishedAt={lastScan} />}
       </div>
 
       <div className="flex flex-wrap items-end justify-between gap-3 border-b">
