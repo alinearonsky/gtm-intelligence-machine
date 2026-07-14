@@ -52,37 +52,61 @@ export function OrgSignalCard({ org, canWrite = false }: { org: FeedOrg; canWrit
         </span>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        <p className="text-sm leading-relaxed">{lead.rationale}</p>
+      <CardContent className="space-y-3">
+        {/* Why now — the one line that drives the reach-out decision. This is the headline. */}
+        <p className="text-[15px] font-medium leading-snug text-foreground">{lead.rationale}</p>
 
-        <div className="space-y-2 border-t pt-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {org.signals.length === 1 ? 'Signal' : `${org.signals.length} signals`}
-          </p>
-          <ul className="space-y-2">
-            {org.signals.map((s) => (
-              <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                <span className="font-medium">{signalTypeLabel(s.signalType)}</span>
-                <span className="text-xs text-muted-foreground" title={stageHint(s.stage)}>
-                  {stageLabel(s.stage)}
-                </span>
-                <StrengthDots value={s.strength} />
-                {s.isBaselineAssessment && (
-                  <Badge variant="outline" className="text-baseline">baseline</Badge>
-                )}
-                <span className="ml-auto flex items-center gap-1">
-                  <EvidencePopover evidence={s.evidence} />
-                  {canWrite && <SignalStatusControls signalId={s.id} status={s.status} />}
-                </span>
-              </li>
-            ))}
-          </ul>
+        {/* Strongest signal, framed as the outreach hook — one click to its evidence. */}
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Top signal
+          </span>
+          <span className="font-medium">{signalTypeLabel(lead.signalType)}</span>
+          <span className="text-muted-foreground" title={stageHint(lead.stage)}>
+            {stageLabel(lead.stage)}
+          </span>
+          <StrengthDots value={lead.strength} />
+          {lead.isBaselineAssessment && (
+            <Badge variant="outline" className="text-baseline">baseline</Badge>
+          )}
+          <span className="ml-auto flex items-center gap-1">
+            <EvidencePopover evidence={lead.evidence} />
+            {canWrite && <SignalStatusControls signalId={lead.id} status={lead.status} />}
+          </span>
         </div>
+
+        {/* Everything else the engine found — collapsed so the eye lands on the decision, not the telemetry. */}
+        {rest > 0 && (
+          <details className="group border-t pt-2">
+            <summary className="flex cursor-pointer list-none items-center text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+              <span className="group-open:hidden">Show {rest} more signal{rest === 1 ? '' : 's'}</span>
+              <span className="hidden group-open:inline">Hide extra signals</span>
+            </summary>
+            <ul className="mt-2 space-y-2">
+              {org.signals.slice(1).map((s) => (
+                <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                  <span className="font-medium">{signalTypeLabel(s.signalType)}</span>
+                  <span className="text-xs text-muted-foreground" title={stageHint(s.stage)}>
+                    {stageLabel(s.stage)}
+                  </span>
+                  <StrengthDots value={s.strength} />
+                  {s.isBaselineAssessment && (
+                    <Badge variant="outline" className="text-baseline">baseline</Badge>
+                  )}
+                  <span className="ml-auto flex items-center gap-1">
+                    <EvidencePopover evidence={s.evidence} />
+                    {canWrite && <SignalStatusControls signalId={s.id} status={s.status} />}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
       </CardContent>
 
       <div className="flex items-center justify-between border-t px-6 py-3">
         <span className="text-xs text-muted-foreground">
-          {rest > 0 ? `Lead signal shown above · ${rest} more` : 'One signal'}
+          {org.signals.length} signal{org.signals.length === 1 ? '' : 's'} found
         </span>
         <CopyBriefButton signal={lead} />
       </div>

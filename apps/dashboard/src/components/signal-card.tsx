@@ -1,11 +1,10 @@
-import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { EvidencePopover } from './evidence-popover'
 import { StrengthDots } from './strength-dots'
-import { signalTypeLabel, stageLabel, stageHint, segmentLabel, priorityLabel } from '@/lib/humanize'
+import { signalTypeLabel, stageLabel, stageHint, priorityLabel } from '@/lib/humanize'
 import type { FeedSignal } from '@/db/types'
 import type { PriorityT } from '@gtm/core'
 
@@ -25,20 +24,12 @@ export function SignalCard({ signal, footer }: { signal: FeedSignal; footer?: Re
   return (
     <Card className={cn('border-l-2', PRIORITY_BORDER[signal.priority] ?? 'border-l-border')}>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Link href={`/orgs/${signal.orgSlug}`} className="font-semibold tracking-tight hover:underline">
-              {signal.orgName}
-            </Link>
-            <Badge variant="outline" className="text-[11px] font-normal text-muted-foreground">
-              {segmentLabel(signal.segment)}
-            </Badge>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">{signalTypeLabel(signal.signalType)}</span>
-            <span title={stageHint(signal.stage)}>{stageLabel(signal.stage)}</span>
-            <StrengthDots value={signal.strength} />
-          </div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="font-semibold tracking-tight">{signalTypeLabel(signal.signalType)}</span>
+          <span className="text-xs text-muted-foreground" title={stageHint(signal.stage)}>
+            {stageLabel(signal.stage)}
+          </span>
+          <StrengthDots value={signal.strength} />
         </div>
         <span className={cn('rounded-full border px-2.5 py-1 text-xs font-medium',
           PRIORITY_PILL[signal.priority] ?? PRIORITY_PILL.ignore)}>

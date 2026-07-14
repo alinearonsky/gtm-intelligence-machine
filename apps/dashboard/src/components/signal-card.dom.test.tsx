@@ -31,9 +31,8 @@ const base: FeedSignal = {
 }
 
 describe('SignalCard', () => {
-  it('renders org, humanized signal type, strength, rationale, and priority', () => {
+  it('renders humanized signal type, strength, rationale, and priority', () => {
     render(<SignalCard signal={base} />)
-    expect(screen.getByText('Beta Labs')).toBeInTheDocument()
     expect(screen.getByText('Entering adoption')).toBeInTheDocument()
     expect(screen.getByLabelText('strength 4 of 5')).toBeInTheDocument()
     expect(screen.getByText(/Beta Labs: prime trial window\./)).toBeInTheDocument()
