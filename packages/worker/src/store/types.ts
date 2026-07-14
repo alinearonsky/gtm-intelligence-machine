@@ -1,4 +1,5 @@
 import type { PostingDiff, RawPostingT, WatchlistOrgT, AtsTypeT, ExtractionT, OrgPostingFacts } from '@gtm/core'
+import type { OrgNarrativeInput } from '../narrate/signature.ts'
 
 export interface OrgRow extends WatchlistOrgT {
   id: number
@@ -60,6 +61,15 @@ export interface LensScoreRecord {
   rubricVersion: number
 }
 
+export interface OrgNarrativeRecord {
+  orgId: number
+  lens: string
+  narrative: string
+  model: string
+  promptVersion: string
+  sourceSignature: string
+}
+
 export interface Store {
   /** Insert or update by slug. The watchlist is authoritative: an omitted
    *  `ats` clears any previously-configured value (detection then applies). */
@@ -99,4 +109,10 @@ export interface Store {
   listSignals(orgId: number): Promise<SignalRow[]>
   /** Upsert a lens score by (signal_id, lens). */
   upsertLensScore(l: LensScoreRecord): Promise<void>
+  /** Deterministic inputs the narrative is derived from, for `lens`. Returns
+   *  null when the org has no scored, non-stale/dismissed signal for the lens. */
+  getOrgNarrativeInput(orgId: number, lens: string): Promise<OrgNarrativeInput | null>
+  getStoredNarrativeSignature(orgId: number, lens: string): Promise<string | null>
+  /** Upsert by (org_id, lens). */
+  upsertOrgNarrative(rec: OrgNarrativeRecord): Promise<void>
 }

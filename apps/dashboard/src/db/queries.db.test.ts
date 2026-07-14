@@ -37,6 +37,28 @@ describe('getOrgProfile', () => {
     expect(profile!.signals).toHaveLength(1)
     expect(profile!.signals[0]!.evidence).toHaveLength(2)
   })
+
+  it('returns per-posting extraction facts and the lens narrative', async () => {
+    await tdb.sql`insert into orgs (slug, name, domain, segment, products) values ('acme','Acme','acme.com','payer','{tt}')`
+    const [org] = await tdb.sql`select id from orgs where slug='acme'`
+    const id = org!.id as number
+    await tdb.sql`insert into postings (org_id, external_id, content_hash, title, url, description, is_baseline, prefilter_pass, first_seen, last_seen)
+              values (${id}, 'p1', 'h', 'Terminologist', 'https://acme.com/p1', 'd', false, true, now(), now())`
+    const [postingRow] = await tdb.sql`select id from postings where external_id='p1'`
+    const pid = postingRow!.id as number
+    await tdb.sql`insert into extractions (posting_id, role_category, seniority, standards_mentioned, clinical_domain, team_context, function_type, confidence, model, prompt_version)
+              values (${pid}, 'data-quality', 'senior', '{FHIR,SNOMED}', 'oncology', 'terminology team', 'new-function', 0.9, 'm', 'ext-v1')`
+    await tdb.sql`insert into org_narratives (org_id, lens, narrative, model, prompt_version, source_signature)
+              values (${id}, 'tt', 'Acme is adopting FHIR.', 'm', 'narr-v1', 'sig1')`
+
+    const profile = await getOrgProfile(tdb.sql, 'acme', 'tt')
+    expect(profile!.narrative).toBe('Acme is adopting FHIR.')
+    const posting = profile!.postings[0]!
+    expect(posting.standards).toEqual(['FHIR', 'SNOMED'])
+    expect(posting.seniority).toBe('senior')
+    expect(posting.clinicalDomain).toBe('oncology')
+    expect(posting.functionType).toBe('new-function')
+  })
 })
 
 describe('getFilterOptions', () => {

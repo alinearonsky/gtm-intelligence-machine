@@ -19,7 +19,7 @@ jobs:
       - run: npm run scan
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      # Only `extract` needs the LLM key; `scan` and `interpret` do not.
+      # `extract` and `narrate` need the LLM key; `scan` and `interpret` do not.
       - run: npm run extract
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -27,3 +27,7 @@ jobs:
       - run: npm run interpret
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - run: npm run narrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

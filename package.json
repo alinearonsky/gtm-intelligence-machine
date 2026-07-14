@@ -10,6 +10,7 @@
     "migrate": "tsx packages/worker/scripts/migrate.ts",
     "extract": "tsx packages/worker/src/extract-cli.ts",
     "interpret": "tsx packages/worker/src/interpret-cli.ts",
+    "narrate": "tsx packages/worker/src/narrate-cli.ts",
     "dev:dashboard": "npm run dev -w apps/dashboard",
     "build:dashboard": "npm run build -w apps/dashboard"
   },

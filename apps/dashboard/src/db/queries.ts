@@ -59,13 +59,24 @@ export async function getOrgProfile(sql: Sql, slug: string, lens: string): Promi
     order by s.created_at desc, s.id desc`
 
   const postingRows = await sql`
-    select external_id, title, url, location, department, is_baseline, first_seen, removed_at
-    from postings where org_id = ${o.id as number}
-    order by first_seen desc`
+    select p.external_id, p.title, p.url, p.location, p.department, p.is_baseline, p.first_seen, p.removed_at,
+           e.seniority, e.clinical_domain, e.team_context, e.standards_mentioned, e.function_type, e.confidence
+    from postings p
+    left join lateral (
+      select seniority, clinical_domain, team_context, standards_mentioned, function_type, confidence
+      from extractions e where e.posting_id = p.id and e.status = 'ok'
+      order by e.created_at desc limit 1
+    ) e on true
+    where p.org_id = ${o.id as number}
+    order by p.first_seen desc`
+
+  const narrativeRow = (await sql`
+    select narrative from org_narratives where org_id = ${o.id as number} and lens = ${lens}`)[0]
 
   return {
     id: o.id as number, slug: o.slug as string, name: o.name as string, domain: o.domain as string,
     segment: o.segment as string, products: o.products as string[], status: o.status as string,
+    narrative: narrativeRow ? (narrativeRow.narrative as string) : null,
     signals: signalRows.map(toFeedSignal),
     postings: postingRows.map((p) => ({
       externalId: p.external_id as string, title: p.title as string, url: p.url as string,
@@ -73,6 +84,12 @@ export async function getOrgProfile(sql: Sql, slug: string, lens: string): Promi
       isBaseline: p.is_baseline as boolean,
       firstSeen: new Date(p.first_seen as string).toISOString(),
       removedAt: p.removed_at ? new Date(p.removed_at as string).toISOString() : null,
+      seniority: (p.seniority as string | null) ?? null,
+      clinicalDomain: (p.clinical_domain as string | null) ?? null,
+      teamContext: (p.team_context as string | null) ?? null,
+      standards: (p.standards_mentioned as string[] | null) ?? [],
+      functionType: (p.function_type as string | null) ?? null,
+      confidence: (p.confidence as number | null) ?? null,
     })),
   }
 }

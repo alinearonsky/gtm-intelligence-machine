@@ -1,6 +1,7 @@
 import postgres from 'postgres'
 import { contentHash, type PostingDiff, type WatchlistOrgT, type AtsTypeT, type ExtractionT, type OrgPostingFacts } from '@gtm/core'
-import type { ApplyDiffMeta, ExtractionMeta, LensScoreRecord, OrgRow, ScanRunResult, SignalRecord, SignalRow, Store } from './types.ts'
+import type { ApplyDiffMeta, ExtractionMeta, LensScoreRecord, OrgNarrativeRecord, OrgRow, ScanRunResult, SignalRecord, SignalRow, Store } from './types.ts'
+import type { OrgNarrativeInput } from '../narrate/signature.ts'
 
 export class PostgresStore implements Store {
   private sql: postgres.Sql
@@ -225,5 +226,55 @@ export class PostgresStore implements Store {
       values (${l.signalId}, ${l.lens}, ${l.priority}, ${l.rationale}, ${l.rubricVersion})
       on conflict (signal_id, lens) do update set
         priority = excluded.priority, rationale = excluded.rationale, rubric_version = excluded.rubric_version`
+  }
+
+  async getOrgNarrativeInput(orgId: number, lens: string): Promise<OrgNarrativeInput | null> {
+    const org = await this.getOrg(orgId)
+    if (!org) return null
+    const signalRows = await this.sql`
+      select s.signal_type, s.stage, s.strength, s.status, s.is_baseline_assessment,
+             ls.priority, ls.rationale
+      from signals s
+      join lens_scores ls on ls.signal_id = s.id and ls.lens = ${lens}
+      where s.org_id = ${orgId} and s.status not in ('stale', 'dismissed')
+      order by s.id`
+    if (signalRows.length === 0) return null
+
+    const factRows = await this.sql`
+      select distinct on (p.id) e.standards_mentioned, e.function_type, e.role_category
+      from postings p
+      join extractions e on e.posting_id = p.id and e.status = 'ok'
+      where p.org_id = ${orgId}
+      order by p.id, e.created_at desc`
+
+    const standards = [...new Set(factRows.flatMap((r) => (r.standards_mentioned as string[])))].sort()
+    const roleCategories = [...new Set(factRows.map((r) => r.role_category as string).filter((r) => r !== 'none'))].sort()
+    const newFunctionCount = factRows.filter((r) => r.function_type === 'new-function').length
+
+    const signals = signalRows.map((r) => ({
+      signalType: r.signal_type as string, stage: r.stage as string, strength: r.strength as number,
+      priority: r.priority as string, status: r.status as string, rationale: r.rationale as string,
+      isBaselineAssessment: r.is_baseline_assessment as boolean,
+    }))
+    return {
+      orgId, lens, orgName: org.name, segment: org.segment,
+      signals, standards, newFunctionCount, roleCategories,
+      baselineOnly: signals.every((s) => s.isBaselineAssessment),
+    }
+  }
+
+  async getStoredNarrativeSignature(orgId: number, lens: string): Promise<string | null> {
+    const r = (await this.sql`select source_signature from org_narratives where org_id = ${orgId} and lens = ${lens}`)[0]
+    return r ? (r.source_signature as string) : null
+  }
+
+  async upsertOrgNarrative(rec: OrgNarrativeRecord): Promise<void> {
+    await this.sql`
+      insert into org_narratives (org_id, lens, narrative, model, prompt_version, source_signature, generated_at)
+      values (${rec.orgId}, ${rec.lens}, ${rec.narrative}, ${rec.model}, ${rec.promptVersion}, ${rec.sourceSignature}, now())
+      on conflict (org_id, lens) do update set
+        narrative = excluded.narrative, model = excluded.model,
+        prompt_version = excluded.prompt_version, source_signature = excluded.source_signature,
+        generated_at = now()`
   }
 }
