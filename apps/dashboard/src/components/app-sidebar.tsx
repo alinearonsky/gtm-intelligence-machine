@@ -21,9 +21,14 @@ export function AppSidebar() {
       <Link
         href="/"
         aria-label="GTM Intelligence — home"
-        className="mb-2 flex size-9 items-center justify-center rounded-md bg-primary font-mono text-sm font-semibold text-primary-foreground shadow-panel"
+        className="mb-2 flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-panel"
       >
-        G
+        {/* Faceted upward peak — a rising signal, folded in Stellate's origami idiom.
+            Two opacities of the foreground read as one facet catching the light. */}
+        <svg viewBox="0 0 24 24" fill="currentColor" className="size-5" aria-hidden>
+          <path d="M12 3.5 21 20 12 15.5 3 20Z" opacity="0.95" />
+          <path d="M12 3.5 12 15.5 3 20Z" opacity="0.55" />
+        </svg>
       </Link>
       <nav aria-label="Primary" className="flex flex-1 flex-col items-center gap-1">
         {NAV.map(({ href, label, icon: Icon, match }) => {
