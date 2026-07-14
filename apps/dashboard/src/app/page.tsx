@@ -29,7 +29,7 @@ export default async function Home({ searchParams }: {
   const canWrite = isPrivate()
 
   return (
-    <main className="mx-auto max-w-3xl space-y-5 p-6">
+    <main className="mx-auto max-w-4xl space-y-5 px-8 py-6">
       <div className="space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">Companies to watch</h1>
         <p className="text-sm text-muted-foreground">
@@ -37,9 +37,9 @@ export default async function Home({ searchParams }: {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b">
         <PriorityTabs />
-        <span className="text-xs text-muted-foreground">
+        <span className="pb-2 text-xs text-muted-foreground">
           {orgs.length} {orgs.length === 1 ? 'company' : 'companies'}
         </span>
       </div>

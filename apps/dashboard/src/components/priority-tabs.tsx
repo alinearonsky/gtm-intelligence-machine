@@ -16,7 +16,7 @@ export function PriorityTabs() {
   const active = sp.get('priority') ?? ''
 
   return (
-    <div role="tablist" aria-label="Priority" className="inline-flex rounded-lg border bg-card p-0.5">
+    <div role="tablist" aria-label="Priority" className="flex items-center gap-5">
       {TABS.map((t) => {
         const next = new URLSearchParams(sp)
         if (t.value) next.set('priority', t.value)
@@ -29,10 +29,10 @@ export function PriorityTabs() {
             role="tab"
             aria-selected={t.value === active}
             className={cn(
-              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              '-mb-px border-b-2 pb-2 text-sm font-medium transition-colors',
               t.value === active
-                ? 'bg-secondary text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'border-primary text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
             {t.label}

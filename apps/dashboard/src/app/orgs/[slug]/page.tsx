@@ -26,7 +26,7 @@ export default async function OrgPage({ params, searchParams }: {
   for (const s of org.signals) for (const e of s.evidence) if (!evidenceByPosting.has(e.externalId)) evidenceByPosting.set(e.externalId, e.quote)
 
   return (
-    <main className="mx-auto max-w-4xl space-y-8 p-6">
+    <main className="mx-auto max-w-4xl space-y-8 px-8 py-6">
       <div className="space-y-3">
         <div className="space-y-1.5">
           <h1 className="text-xl font-semibold tracking-tight">{org.name}</h1>
@@ -41,7 +41,7 @@ export default async function OrgPage({ params, searchParams }: {
 
         {org.narrative && <p className="text-sm leading-relaxed text-foreground/90">{org.narrative}</p>}
 
-        <div className="flex flex-wrap gap-4 rounded-lg border bg-muted/20 p-3 text-sm">
+        <div className="flex flex-wrap gap-x-8 gap-y-4 rounded-lg border bg-secondary/60 p-4 text-sm shadow-panel">
           <Tile label="Standards">{footprint.length ? <span className="font-mono">{footprint.join(' · ')}</span> : '—'}</Tile>
           <Tile label="New-function roles"><span className="font-mono">{newFunctionCount(org)}</span></Tile>
           <Tile label="Priority">{priority ? <Badge variant="outline">{priority}</Badge> : '—'}</Tile>
@@ -82,7 +82,7 @@ export default async function OrgPage({ params, searchParams }: {
 function Tile({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-0.5">
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="text-[11px] font-medium uppercase tracking-wider text-primary/70">{label}</div>
       <div>{children}</div>
     </div>
   )

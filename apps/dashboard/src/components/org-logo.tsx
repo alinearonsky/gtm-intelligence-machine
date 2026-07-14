@@ -10,7 +10,7 @@ export function OrgLogo({ name, className }: { domain?: string; name: string; cl
     <span
       aria-hidden
       className={cn(
-        'grid size-10 shrink-0 place-items-center rounded-md border bg-muted text-sm font-semibold text-muted-foreground',
+        'grid size-10 shrink-0 place-items-center rounded-md bg-gradient-to-b from-card to-secondary text-sm font-semibold text-secondary-foreground ring-1 ring-border shadow-panel',
         className,
       )}
     >
