@@ -23,9 +23,11 @@ export interface OrgNarrativeInput {
 }
 
 // Signature covers exactly the fields the narrative is derived from, so it
-// regenerates only when the *meaning* changes. orgName is display-only and is
-// deliberately excluded. Arrays are sorted and signals canonically ordered so
-// row/scan order never churns the hash.
+// regenerates only when the *meaning* changes. orgName is NO LONGER excluded —
+// it appears in the narrative text (the narrator leads with it), so it must
+// drive regeneration; otherwise a rename leaves the stored narrative stale.
+// Arrays are sorted and signals canonically ordered so row/scan order never
+// churns the hash.
 export function computeSignature(input: OrgNarrativeInput): string {
   const signals = [...input.signals]
     .map((s) => ({
@@ -35,6 +37,7 @@ export function computeSignature(input: OrgNarrativeInput): string {
     }))
     .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))
   const canonical = {
+    orgName: input.orgName,
     lens: input.lens,
     segment: input.segment,
     signals,

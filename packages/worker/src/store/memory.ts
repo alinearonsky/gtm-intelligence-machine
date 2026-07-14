@@ -117,7 +117,9 @@ export class MemoryStore implements Store {
 
   async getOrgExtractionFacts(orgId: number): Promise<OrgPostingFacts[]> {
     const out: OrgPostingFacts[] = []
-    for (const p of this.postings.get(orgId)!.values()) {
+    const byId = this.postings.get(orgId)
+    if (!byId) return out
+    for (const p of byId.values()) {
       const ok = p.extractions.filter((e) => e.status === 'ok')
       if (ok.length === 0) continue
       const latest = ok.reduce((a, b) => (a.createdAt >= b.createdAt ? a : b))

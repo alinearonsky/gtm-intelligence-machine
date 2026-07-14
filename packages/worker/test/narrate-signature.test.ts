@@ -20,7 +20,7 @@ describe('computeSignature', () => {
     const b = computeSignature({ ...base, signals: [{ ...base.signals[0]!, priority: 'watch' }] })
     expect(a).not.toBe(b)
   })
-  it('ignores orgName (display-only, not a driver)', () => {
-    expect(computeSignature(base)).toBe(computeSignature({ ...base, orgName: 'Renamed' }))
+  it('changes when orgName changes (the name appears in the stored narrative)', () => {
+    expect(computeSignature(base)).not.toBe(computeSignature({ ...base, orgName: 'Renamed' }))
   })
 })
