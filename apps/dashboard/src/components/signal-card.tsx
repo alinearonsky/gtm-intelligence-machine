@@ -16,8 +16,8 @@ const PRIORITY_BORDER: Record<PriorityT, string> = {
 }
 
 const PRIORITY_PILL: Record<PriorityT, string> = {
-  'act-now': 'border-priority-act-now/40 bg-priority-act-now/10 text-priority-act-now',
-  watch: 'border-priority-watch/40 bg-priority-watch/10 text-priority-watch',
+  'act-now': 'border-priority-act-now/40 bg-priority-act-now/10 text-priority-act-now-fg',
+  watch: 'border-priority-watch/40 bg-priority-watch/10 text-priority-watch-fg',
   ignore: 'border-transparent bg-muted text-muted-foreground',
 }
 

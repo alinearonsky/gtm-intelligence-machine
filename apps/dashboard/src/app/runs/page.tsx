@@ -28,7 +28,7 @@ export default async function RunsPage() {
               <TableRow key={r.id}>
                 <TableCell className="font-mono text-xs">{new Date(r.finishedAt).toLocaleString()}</TableCell>
                 <TableCell className="font-mono tabular-nums">{r.orgsScanned}</TableCell>
-                <TableCell className={r.orgsFailed > 0 ? 'font-mono font-medium tabular-nums text-priority-act-now' : 'font-mono tabular-nums text-muted-foreground'}>
+                <TableCell className={r.orgsFailed > 0 ? 'font-mono font-medium tabular-nums text-priority-act-now-fg' : 'font-mono tabular-nums text-muted-foreground'}>
                   {r.orgsFailed}
                 </TableCell>
                 <TableCell className="font-mono tabular-nums">{r.postingsNew}</TableCell>

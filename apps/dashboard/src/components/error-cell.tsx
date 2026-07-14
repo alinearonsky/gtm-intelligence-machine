@@ -8,7 +8,7 @@ export function ErrorCell({ errors }: { errors: { orgSlug: string; message: stri
   const text = errors.map((e) => `${e.orgSlug}: ${e.message}`).join('; ')
   return (
     <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} title={open ? 'collapse' : 'expand'}
-      className={`block max-w-md text-left font-mono text-xs text-priority-act-now ${open ? 'whitespace-pre-wrap break-words' : 'truncate'}`}>
+      className={`block max-w-md text-left font-mono text-xs text-priority-act-now-fg${open ? 'whitespace-pre-wrap break-words' : 'truncate'}`}>
       {text}
     </button>
   )

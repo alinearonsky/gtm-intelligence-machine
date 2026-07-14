@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { LensSwitcher } from '@/components/lens-switcher'
 import { SiteFooter } from '@/components/site-footer'
 import { AppSidebar } from '@/components/app-sidebar'
+import { BrandSignature } from '@/components/brand-signature'
 import { isPrivate } from '@/lib/instance'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="flex-1">{children}</div>
           <SiteFooter />
         </div>
+        <BrandSignature />
       </body>
     </html>
   )
