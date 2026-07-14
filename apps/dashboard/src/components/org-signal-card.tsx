@@ -35,7 +35,7 @@ export function OrgSignalCard({ org, canWrite = false }: { org: FeedOrg; canWrit
           <div className="space-y-0.5">
             <Link
               href={`/orgs/${org.orgSlug}`}
-              className="text-lg font-semibold leading-tight tracking-tight hover:underline"
+              className="text-lg font-semibold leading-tight tracking-tight transition-colors hover:text-primary"
             >
               {org.orgName}
             </Link>

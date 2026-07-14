@@ -5,6 +5,30 @@ a non-technical GTM user should open the dashboard and immediately know who to a
 on and why. Reference points: Linear / Vercel dashboards — quiet surface, strong
 typographic hierarchy, color used only to carry meaning.
 
+## 0. Visual direction — Stellate reskin (2026-07-14, branch `feat/stellate-reskin`)
+
+The surface leans on **Stellate's** engineered-console look: cool navy chrome, a
+blue primary, and hairline slate borders. It stays restrained — this is a tool, not
+a marketing page — but the body now reads as a real console instead of flat white.
+
+- **Chrome vs. content:** the top bar is dark navy (`--sidebar` family) with a blue
+  logo mark. Content sits on a near-white cool background with a faint blue
+  atmospheric wash falling from under the header (`body` gradient, ~420px, fixed).
+- **Two colour jobs, kept separate.** Periwinkle-indigo (`--primary`, sampled from
+  stellate.co) is the *interactive / chrome* accent — links on hover, focus rings,
+  the lens switcher, org-page micro-labels. Coral/violet/grey (`--priority-*`)
+  remain the *semantic* colours and still obey the two-places rule below. Coral
+  (act-now) is Stellate's signature warm doing double duty as "urgent". Never use
+  the indigo primary to signal priority, and never use a priority colour for a
+  plain interactive control.
+- **Elevation:** surfaces read as raised via soft, cool-navy-tinted shadows, not
+  heavier borders. Tokens: `--shadow-card` (cards) and `--shadow-panel` (tabs,
+  filter bar, spec panels, monogram tiles). Every card is `ring-1 ring-border` +
+  `shadow-card`.
+- **Known debt:** the `.dark` block still holds the pre-reskin neutral palette —
+  dark mode has not been re-tuned to Stellate. The dashboard ships light-only for
+  now, so this is deferred, not blocking.
+
 ## 1. Tokens (source of truth: `src/app/globals.css`)
 
 All values are CSS variables consumed through Tailwind. Never hard-code a hex.
@@ -12,7 +36,9 @@ All values are CSS variables consumed through Tailwind. Never hard-code a hex.
 - **Type:** `--font-sans` = Geist; `--font-geist-mono` = Geist Mono (numbers, IDs, ATS slugs, DSL only).
 - **Surface:** `background`, `card`, `muted`, `border`, `foreground`, `muted-foreground`.
 - **Priority (semantic — the only "brand" color):**
-  - `--priority-act-now` (amber) — a live buying window, act this week.
+  - `--priority-act-now` (coral, Stellate `#FF7752`) — a live buying window, act
+    this week. Deliberately Stellate's signature warm: the one warm accent on the
+    dashboard doubles as the "urgent" semantic.
   - `--priority-watch` (violet) — real movement, monitor.
   - `--priority-ignore` / `--baseline` (neutral grey) — snapshot, not an event.
 - **Radius:** `rounded-md` for tiles/logos, `rounded-lg` for cards/containers, `rounded-full` for pills.
@@ -53,8 +79,14 @@ font is reserved for genuinely technical values (IDs, ATS names, the condition D
   table). Plumbing. Demoted to the footer.
 - **/runs** — "Scan history": full run log, reached from Monitoring.
 
-Top nav is intentionally minimal (logo → home, lens switcher, instance badge).
-Secondary pages live in the footer — they are reference/plumbing, not daily surfaces.
+**Shell (Stellate reskin):** a dark-navy left **icon rail** (`components/app-sidebar.tsx`)
+is the persistent primary nav — Companies (`/`), Monitoring (`/watchlist`), Scans
+(`/runs`), Matching (`/ontology`) — icon + label, active state highlighted. Above the
+content sits a dark-navy top bar with a `GTM Intelligence / <lens>` breadcrumb + the
+instance badge. This mirrors Stellate's console shell (left rail + dark chrome framing
+light, wide content). The footer is now just a signature line; the routes it used to
+hold moved into the rail. Content pages are left-aligned, `max-w-4xl`, `px-8`.
+Priority tabs are an underline tab-strip (blue active underline), not a pill.
 
 ## 5. Accepted debt / follow-ups
 

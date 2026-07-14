@@ -18,7 +18,7 @@ function Select({ label, param, value, children, onChange }: {
         aria-label={label}
         value={value}
         onChange={(e) => onChange(param, e.target.value)}
-        className="h-7 rounded-md border bg-card px-1.5 font-mono text-xs text-foreground"
+        className="h-7 cursor-pointer rounded-md border bg-card px-1.5 font-mono text-xs text-foreground transition-colors hover:border-ring/40 focus:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20"
       >
         {children}
       </select>
@@ -58,7 +58,7 @@ export function FilterBar({ options }: { options: FilterOptions }) {
   const activeCount = FILTER_KEYS.filter((k) => sp.get(k)).length
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-card px-3 py-2">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border bg-card px-3 py-2 shadow-panel">
       <Select label="Segment" param="segment" value={sp.get('segment') ?? ''} onChange={set}>
         <option value="">All</option>
         {options.segments.map((s) => <option key={s} value={s}>{segmentLabel(s)}</option>)}
